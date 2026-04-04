@@ -1,6 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dashboard</title>
 
 <!-- Firebase -->
@@ -10,23 +12,29 @@
 
 <style>
 body {
-    background: #0b1220;
-    color: white;
-    font-family: Arial;
-    text-align: center;
+    background:#0b1220;
+    color:white;
+    font-family:Arial;
+    text-align:center;
 }
+
 .card {
-    background: #1a2333;
-    margin: 10px;
-    padding: 15px;
-    border-radius: 10px;
+    background:#1a2333;
+    margin:15px;
+    padding:20px;
+    border-radius:12px;
 }
+
 button {
-    padding: 10px;
-    margin: 5px;
+    padding:12px;
+    margin:5px;
+    cursor:pointer;
 }
+
 input {
-    padding: 8px;
+    padding:10px;
+    width:90%;
+    margin-top:10px;
 }
 </style>
 
@@ -36,63 +44,40 @@ input {
 
 <h1>SummitFX Dashboard</h1>
 
-<h3 id="userEmail"></h3>
+<p id="userEmail"></p>
 
-<!-- BALANCE -->
 <div class="card">
 <h2>Your Balance</h2>
-<p id="balance">$0</p>
+<h1 id="balance">$0</h1>
 </div>
 
 <!-- INVESTMENT PLANS -->
 <div class="card">
-<h2>24 Hour Plans</h2>
+<h2>Investment Plans</h2>
 
-<button onclick="selectPlan(400,8000)">Invest $400 → $8000</button>
-<button onclick="selectPlan(500,10000)">Invest $500 → $10000</button>
-<button onclick="selectPlan(600,12000)">Invest $600 → $12000</button>
-<button onclick="selectPlan(700,14000)">Invest $700 → $14000</button>
-<button onclick="selectPlan(800,16000)">Invest $800 → $16000</button>
-
-</div>
-
-<div class="card">
-<h2>3 Day Plans</h2>
-
-<button onclick="selectPlan(1000,30000)">Invest $1000 → $30000</button>
-<button onclick="selectPlan(2000,60000)">Invest $2000 → $60000</button>
-<button onclick="selectPlan(3000,90000)">Invest $3000 → $90000</button>
-<button onclick="selectPlan(4000,120000)">Invest $4000 → $120000</button>
-<button onclick="selectPlan(5000,150000)">Invest $5000 → $150000</button>
+<button onclick="selectPlan(400,8000)">$400 → $8000</button>
+<button onclick="selectPlan(500,10000)">$500 → $10000</button>
+<button onclick="selectPlan(600,12000)">$600 → $12000</button>
+<button onclick="selectPlan(700,14000)">$700 → $14000</button>
+<button onclick="selectPlan(800,16000)">$800 → $16000</button>
 
 </div>
 
-<!-- DEPOSIT -->
+<!-- DEPOSIT SECTION -->
 <div class="card">
-<h2>Deposit USDT</h2>
+<h2>Deposit USDT (TRC20)</h2>
 
-<input value="YOUR_USDT_ADDRESS" id="addr" readonly>
+<p>Send USDT to the address below:</p>
+
+<input id="usdtAddress" value="TLEMJfnDaAqSoGWTG19WRMp2nco3qM6kDW" readonly>
+
 <br><br>
-<button onclick="copy()">Copy Address</button>
 
-<p id="selectedPlan"></p>
-</div>
+<button onclick="copyAddress()">Copy Address</button>
 
-<!-- LIVE MARKET -->
-<div class="card">
-<h2>Live Market (XAU/USD)</h2>
+<p>After sending, wait for confirmation.</p>
 
-<div id="tradingview"></div>
-
-<script src="https://s3.tradingview.com/tv.js"></script>
-<script>
-new TradingView.widget({
-  "width": "100%",
-  "height": 300,
-  "symbol": "FX:XAUUSD",
-  "theme": "dark"
-});
-</script>
+<p id="planInfo"></p>
 
 </div>
 
@@ -100,42 +85,34 @@ new TradingView.widget({
 
 <script>
 
-// FIREBASE CONFIG
+// 🔥 FIREBASE CONFIG (REPLACE WITH YOURS)
 const firebaseConfig = {
-  apiKey: "AIzaSyAT-Yr_wusE2KKW7YpEfQpQMeJYe2WqWW0",
-  authDomain: "summitfx-trading.firebaseapp.com",
-  projectId: "summitfx-trading",
-  storageBucket: "summitfx-trading.firebasestorage.app",
-  messagingSenderId: "838670474162",
-  appId: "1:838670474162:web:b3d9eac185a7932a20a2ab"
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
 };
 
-// INITIALIZE FIREBASE
+// Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 
-// FIRESTORE DATABASE
 const db = firebase.firestore();
 
-// AUTH CHECK + LOAD USER DATA
+// AUTH CHECK
 firebase.auth().onAuthStateChanged(user => {
     if(user){
-
         document.getElementById("userEmail").innerText = user.email;
 
-        const userRef = db.collection("users").doc(user.uid);
+        const ref = db.collection("users").doc(user.uid);
 
-        userRef.get().then(doc => {
-
-            if(!doc.exists){
-                userRef.set({
-                    balance: 0
-                });
-                document.getElementById("balance").innerText = "$0";
+        ref.get().then(doc => {
+            if(doc.exists){
+                document.getElementById("balance").innerText = "$" + doc.data().balance;
             } else {
-                document.getElementById("balance").innerText =
-                    "$" + doc.data().balance;
+                ref.set({balance: 0});
             }
-
         });
 
     } else {
@@ -143,30 +120,32 @@ firebase.auth().onAuthStateChanged(user => {
     }
 });
 
-// COPY USDT ADDRESS
-function copy(){
-    navigator.clipboard.writeText(addr.value);
-    alert("USDT Address Copied!");
+// COPY ADDRESS FUNCTION
+function copyAddress(){
+    let address = document.getElementById("usdtAddress").value;
+
+    navigator.clipboard.writeText(address)
+    .then(() => {
+        alert("Address copied! Paste it in your wallet.");
+    });
 }
 
-// SELECT PLAN + SAVE TO DATABASE
+// SELECT PLAN
 function selectPlan(amount, profit){
 
     firebase.auth().onAuthStateChanged(user => {
         if(user){
-
             db.collection("users").doc(user.uid).update({
-                selectedPlan: {
+                plan: {
                     amount: amount,
                     profit: profit
                 }
             });
-
-            document.getElementById("selectedPlan").innerText =
-            "Selected Plan: $" + amount + " → $" + profit +
-            ". Send USDT and wait for confirmation.";
         }
     });
+
+    document.getElementById("planInfo").innerText =
+    "Selected Plan: $" + amount + " → $" + profit;
 }
 
 // LOGOUT
