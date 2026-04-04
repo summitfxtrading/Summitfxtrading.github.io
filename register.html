@@ -1,6 +1,8 @@
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+<meta charset="UTF-8">
 <title>Register</title>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -15,7 +17,7 @@
 <input type="email" id="email" placeholder="Email"><br><br>
 <input type="password" id="password" placeholder="Password"><br><br>
 
-<button onclick="register()">Register</button>
+<button onclick="register()">Create Account</button>
 
 <script>
 
@@ -23,6 +25,9 @@ const firebaseConfig = {
   apiKey: "YOUR_API_KEY",
   authDomain: "YOUR_PROJECT.firebaseapp.com",
   projectId: "YOUR_PROJECT",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -33,10 +38,12 @@ function register(){
 
     firebase.auth().createUserWithEmailAndPassword(email, password)
     .then(() => {
-        alert("Account created");
+        alert("Account created successfully");
         window.location.href = "login.html";
     })
-    .catch(err => alert(err.message));
+    .catch(error => {
+        alert(error.message);
+    });
 }
 
 </script>
