@@ -1,11 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Login - SummitFX</title>
+<title>SummitFX Login</title>
 
-<!-- Firebase -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 
@@ -14,27 +13,27 @@ body {
     margin: 0;
     font-family: Arial, sans-serif;
     background: linear-gradient(135deg, #0b1220, #111a2e);
-    color: white;
+    height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
 }
 
-/* MAIN CARD */
+/* LOGIN BOX */
 .container {
+    width: 90%;
+    max-width: 420px;
     background: #1a2333;
     padding: 40px;
     border-radius: 15px;
-    width: 90%;
-    max-width: 400px;
-    box-shadow: 0px 0px 20px rgba(0,0,0,0.5);
     text-align: center;
+    box-shadow: 0 0 25px rgba(0,0,0,0.6);
 }
 
 /* TITLE */
-h1 {
+h2 {
     color: #00ffcc;
+    font-size: 28px;
     margin-bottom: 10px;
 }
 
@@ -46,38 +45,40 @@ p {
 /* INPUTS */
 input {
     width: 100%;
-    padding: 14px;
-    margin: 10px 0;
+    padding: 15px;
+    margin: 12px 0;
     border: none;
     border-radius: 8px;
     background: #0b1220;
     color: white;
+    font-size: 16px;
 }
 
 /* BUTTON */
 button {
     width: 100%;
-    padding: 14px;
-    margin-top: 10px;
+    padding: 15px;
+    margin-top: 15px;
     border: none;
     border-radius: 8px;
     background: linear-gradient(45deg, #00ffcc, #0099ff);
     color: black;
+    font-size: 16px;
     font-weight: bold;
     cursor: pointer;
-    font-size: 16px;
 }
 
 button:hover {
     opacity: 0.9;
 }
 
-/* FOOTER */
+/* FOOTER TEXT */
 .footer {
     margin-top: 15px;
     font-size: 13px;
     color: #888;
 }
+
 </style>
 
 </head>
@@ -86,59 +87,43 @@ button:hover {
 
 <div class="container">
 
-    <h1>SummitFX</h1>
+    <h2>SummitFX</h2>
     <p>Forex Trading Investment Platform</p>
 
-    <input type="email" id="email" placeholder="Enter Email">
-    <input type="password" id="password" placeholder="Enter Password">
+    <input id="email" placeholder="Email" type="email">
+    <input id="password" placeholder="Password" type="password">
 
     <button onclick="login()">Login</button>
-    <button onclick="register()">Create Account</button>
 
     <div class="footer">
-        Trade smarter. Invest securely.
+        Trade smart. Invest with confidence.
     </div>
 
 </div>
 
 <script>
 
-// 🔥 YOUR FIREBASE CONFIG HERE
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT",
-  storageBucket: "YOUR_PROJECT.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyAT-Yr_wusE2KKW7YpEfQpQMeJYe2WqWW0",
+  authDomain: "summitfx-trading.firebaseapp.com",
+  projectId: "summitfx-trading",
+  storageBucket: "summitfx-trading.firebasestorage.app",
+  messagingSenderId: "838670474162",
+  appId: "1:838670474162:web:b3d9eac185a7932a20a2ab",
+  measurementId: "G-HKLYNSZFT1"
 };
 
 firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
 
 // LOGIN FUNCTION
 function login(){
-    let email = document.getElementById("email").value;
-    let password = document.getElementById("password").value;
-
-    auth.signInWithEmailAndPassword(email, password)
+    firebase.auth().signInWithEmailAndPassword(
+        email.value,
+        password.value
+    )
     .then(() => {
-        alert("Login successful");
+        alert("Login successful!");
         window.location.href = "dashboard.html";
-    })
-    .catch(error => {
-        alert(error.message);
-    });
-}
-
-// REGISTER FUNCTION
-function register(){
-    let email = document.getElementById("email").value;
-    let password = document.getElementById("password").value;
-
-    auth.createUserWithEmailAndPassword(email, password)
-    .then(() => {
-        alert("Account created");
     })
     .catch(error => {
         alert(error.message);
