@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Dashboard</title>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+<style>
+body {
+    background: #0b1220;
+    color: white;
+    font-family: Arial;
+    text-align: center;
+}
+.card {
+    background: #1a2333;
+    margin: 10px;
+    padding: 15px;
+    border-radius: 10px;
+}
+button {
+    padding: 10px;
+    margin: 5px;
+}
+input {
+    padding: 8px;
+}
+</style>
+
+</head>
+
+<body>
+
+<h1>SummitFX Dashboard</h1>
+
+<h3 id="userEmail"></h3>
+
+<!-- BALANCE -->
+<div class="card">
+<h2>Your Balance</h2>
+<p id="balance">$0</p>
+</div>
+
+<!-- INVESTMENT PLANS -->
+<div class="card">
+<h2>24 Hour Plans</h2>
+
+<button onclick="selectPlan(400,8000)">Invest $400 → $8000</button>
+<button onclick="selectPlan(500,10000)">Invest $500 → $10000</button>
+<button onclick="selectPlan(600,12000)">Invest $600 → $12000</button>
+<button onclick="selectPlan(700,14000)">Invest $700 → $14000</button>
+<button onclick="selectPlan(800,16000)">Invest $800 → $16000</button>
+
+</div>
+
+<div class="card">
+<h2>3 Day Plans</h2>
+
+<button onclick="selectPlan(1000,30000)">Invest $1000 → $30000</button>
+<button onclick="selectPlan(2000,60000)">Invest $2000 → $60000</button>
+<button onclick="selectPlan(3000,90000)">Invest $3000 → $90000</button>
+<button onclick="selectPlan(4000,120000)">Invest $4000 → $120000</button>
+<button onclick="selectPlan(5000,150000)">Invest $5000 → $150000</button>
+
+</div>
+
+<!-- DEPOSIT -->
+<div class="card">
+<h2>Deposit USDT</h2>
+
+<input value="YOUR_USDT_ADDRESS" id="addr" readonly>
+<br><br>
+<button onclick="copy()">Copy Address</button>
+
+<p id="selectedPlan"></p>
+</div>
+
+<!-- LIVE MARKET -->
+<div class="card">
+<h2>Live Market (XAU/USD)</h2>
+
+<div id="tradingview"></div>
+
+<script src="https://s3.tradingview.com/tv.js"></script>
+<script>
+new TradingView.widget({
+  "width": "100%",
+  "height": 300,
+  "symbol": "FX:XAUUSD",
+  "theme": "dark"
+});
+</script>
+
+</div>
+
+<button onclick="logout()">Logout</button>
+
+<script>
+
+// FIREBASE CONFIG
+const firebaseConfig = {
+  apiKey: "AIzaSyAT-Yr_wusE2KKW7YpEfQpQMeJYe2WqWW0",
+  authDomain: "summitfx-trading.firebaseapp.com",
+  projectId: "summitfx-trading",
+  storageBucket: "summitfx-trading.firebasestorage.app",
+  messagingSenderId: "838670474162",
+  appId: "1:838670474162:web:b3d9eac185a7932a20a2ab"
+};
+
+// INITIALIZE FIREBASE
+firebase.initializeApp(firebaseConfig);
+
+// FIRESTORE DATABASE
+const db = firebase.firestore();
+
+// AUTH CHECK + LOAD USER DATA
+firebase.auth().onAuthStateChanged(user => {
+    if(user){
+
+        document.getElementById("userEmail").innerText = user.email;
+
+        const userRef = db.collection("users").doc(user.uid);
+
+        userRef.get().then(doc => {
+
+            if(!doc.exists){
+                userRef.set({
+                    balance: 0
+                });
+                document.getElementById("balance").innerText = "$0";
+            } else {
+                document.getElementById("balance").innerText =
+                    "$" + doc.data().balance;
+            }
+
+        });
+
+    } else {
+        window.location.href = "login.html";
+    }
+});
+
+// COPY USDT ADDRESS
+function copy(){
+    navigator.clipboard.writeText(addr.value);
+    alert("USDT Address Copied!");
+}
+
+// SELECT PLAN + SAVE TO DATABASE
+function selectPlan(amount, profit){
+
+    firebase.auth().onAuthStateChanged(user => {
+        if(user){
+
+            db.collection("users").doc(user.uid).update({
+                selectedPlan: {
+                    amount: amount,
+                    profit: profit
+                }
+            });
+
+            document.getElementById("selectedPlan").innerText =
+            "Selected Plan: $" + amount + " → $" + profit +
+            ". Send USDT and wait for confirmation.";
+        }
+    });
+}
+
+// LOGOUT
+function logout(){
+    firebase.auth().signOut();
+    window.location.href = "login.html";
+}
+
+</script>
+
+</body>
+</html>
