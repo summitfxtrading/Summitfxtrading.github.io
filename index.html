@@ -1,21 +1,148 @@
-html>
+<!DOCTYPE html>
+<html>
 <head>
     <title>SummitFX Trading</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial;
+            background: #0b1220;
+            color: white;
+        }
+
+        /* HEADER */
+        .header {
+            background: #111a2e;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 20px;
+            color: #00ffcc;
+            font-weight: bold;
+        }
+
+        /* MARKET BAR */
+        .market {
+            display: flex;
+            justify-content: space-around;
+            background: #1a2333;
+            padding: 10px;
+            font-size: 14px;
+        }
+
+        .market span {
+            color: #00ffcc;
+        }
+
+        /* MAIN */
+        .main {
+            padding: 25px;
+        }
+
+        .tag {
+            color: orange;
+            letter-spacing: 2px;
+            font-size: 14px;
+        }
+
+        .big {
+            font-size: 26px;
+            margin: 10px 0;
+        }
+
+        .desc {
+            color: #aaa;
+            margin-bottom: 25px;
+        }
+
+        /* BUTTONS */
+        .buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 12px 20px;
+            border-radius: 25px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .login {
+            background: transparent;
+            border: 1px solid white;
+            color: white;
+        }
+
+        .register {
+            background: linear-gradient(45deg, #00ffcc, #0099ff);
+            color: black;
+        }
+
+        /* ICONS */
+        .icons {
+            margin-top: 30px;
+            display: flex;
+            justify-content: space-around;
+            opacity: 0.7;
+            font-size: 22px;
+        }
+
+    </style>
+
 </head>
 
-<body style="background:#0b1220; color:white; text-align:center;">
+<body>
 
-    <h1>Welcome to SummitFX Trading</h1>
+    <!-- HEADER -->
+    <div class="header">
+        <div class="logo">SummitFX</div>
+    </div>
 
-    <p>Trade Forex & Invest Smart</p>
+    <!-- MARKET BAR -->
+    <div class="market">
+        <div>BTC: <span>$69,000</span></div>
+        <div>ETH: <span>$2,100</span></div>
+        <div>XAU/USD: <span>$2,300</span></div>
+    </div>
 
-    <a href="login.html">
-        <button>Login</button>
-    </a>
+    <!-- MAIN CONTENT -->
+    <div class="main">
 
-    <a href="register.html">
-        <button>Register</button>
-    </a>
+        <div class="tag">DATA-DRIVEN GAINS USING A.I</div>
+
+        <div class="big">
+            Trade Forex & Grow Your Wealth With Smart Technology
+        </div>
+
+        <div class="desc">
+            Our platform uses advanced AI trading systems to analyze markets and deliver high-precision profitable trades.
+        </div>
+
+        <!-- BUTTONS -->
+        <div class="buttons">
+            <a href="login.html">
+                <button class="login">Sign In</button>
+            </a>
+
+            <a href="register.html">
+                <button class="register">Sign Up</button>
+            </a>
+        </div>
+
+        <!-- ICONS -->
+        <div class="icons">
+            ⚡ 📊 🤖 💰
+        </div>
+
+    </div>
 
 </body>
 </html>
