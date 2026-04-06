@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -85,14 +86,15 @@ input {
 
 <script>
 
-// 🔥 FIREBASE CONFIG (REPLACE WITH YOURS)
+// ✅ YOUR REAL FIREBASE CONFIG (FIXED)
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT",
-  storageBucket: "YOUR_PROJECT.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyAT-Yr_wusE2KKW7YpEfQpQMeJYe2WqWW0",
+  authDomain: "summitfx-trading.firebaseapp.com",
+  projectId: "summitfx-trading",
+  storageBucket: "summitfx-trading.firebasestorage.app",
+  messagingSenderId: "838670474162",
+  appId: "1:838670474162:web:b3d9eac185a7932a20a2ab",
+  measurementId: "G-HKLYNSZFT1"
 };
 
 // Initialize Firebase
@@ -100,16 +102,18 @@ firebase.initializeApp(firebaseConfig);
 
 const db = firebase.firestore();
 
-// AUTH CHECK
-firebase.auth().onAuthStateChanged(user => {
-    if(user){
+// ✅ CORRECT AUTH CHECK (NO LOGOUT LOOP)
+firebase.auth().onAuthStateChanged(function(user) {
+    if (user) {
+
         document.getElementById("userEmail").innerText = user.email;
 
         const ref = db.collection("users").doc(user.uid);
 
         ref.get().then(doc => {
             if(doc.exists){
-                document.getElementById("balance").innerText = "$" + doc.data().balance;
+                document.getElementById("balance").innerText =
+                "$" + doc.data().balance;
             } else {
                 ref.set({balance: 0});
             }
@@ -120,38 +124,39 @@ firebase.auth().onAuthStateChanged(user => {
     }
 });
 
-// COPY ADDRESS FUNCTION
+// COPY ADDRESS
 function copyAddress(){
     let address = document.getElementById("usdtAddress").value;
 
     navigator.clipboard.writeText(address)
     .then(() => {
-        alert("Address copied! Paste it in your wallet.");
+        alert("Address copied!");
     });
 }
 
 // SELECT PLAN
 function selectPlan(amount, profit){
+    const user = firebase.auth().currentUser;
 
-    firebase.auth().onAuthStateChanged(user => {
-        if(user){
-            db.collection("users").doc(user.uid).update({
-                plan: {
-                    amount: amount,
-                    profit: profit
-                }
-            });
-        }
-    });
+    if(user){
+        db.collection("users").doc(user.uid).update({
+            plan: {
+                amount: amount,
+                profit: profit
+            }
+        });
 
-    document.getElementById("planInfo").innerText =
-    "Selected Plan: $" + amount + " → $" + profit;
+        document.getElementById("planInfo").innerText =
+        "Selected Plan: $" + amount + " → $" + profit;
+    }
 }
 
 // LOGOUT
 function logout(){
-    firebase.auth().signOut();
-    window.location.href = "login.html";
+    firebase.auth().signOut()
+    .then(() => {
+        window.location.href = "login.html";
+    });
 }
 
 </script>
