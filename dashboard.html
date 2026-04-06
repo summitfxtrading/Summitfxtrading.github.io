@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,80 +12,183 @@
 
 <style>
 body {
+    margin:0;
+    font-family:Arial;
     background:#0b1220;
     color:white;
-    font-family:Arial;
-    text-align:center;
 }
 
+/* HEADER */
+.header {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:15px;
+    background:#111a2e;
+}
+
+.logo {
+    font-size:18px;
+    font-weight:bold;
+    color:#00ffcc;
+}
+
+/* TICKER */
+.ticker {
+    background:#1a2333;
+    padding:10px;
+    overflow:hidden;
+    white-space:nowrap;
+    font-size:14px;
+}
+
+.ticker span {
+    display:inline-block;
+    padding-right:40px;
+    animation: scroll 15s linear infinite;
+}
+
+@keyframes scroll {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
+}
+
+/* CARD */
 .card {
     background:#1a2333;
     margin:15px;
     padding:20px;
-    border-radius:12px;
+    border-radius:15px;
+    text-align:left;
 }
 
+.card h3 {
+    color:#aaa;
+    margin-bottom:10px;
+}
+
+.balance {
+    font-size:28px;
+}
+
+/* PROFIT STYLE */
+.green {
+    color:#00ffcc;
+}
+
+/* INPUT */
+input {
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:8px;
+    margin-top:10px;
+}
+
+/* BUTTON */
 button {
     padding:12px;
-    margin:5px;
+    margin-top:10px;
+    border:none;
+    border-radius:8px;
     cursor:pointer;
 }
 
-input {
-    padding:10px;
-    width:90%;
-    margin-top:10px;
+/* MENU */
+.menu {
+    position:fixed;
+    bottom:0;
+    width:100%;
+    background:#111a2e;
+    display:flex;
+    justify-content:space-around;
+    padding:10px 0;
 }
+
+.menu div {
+    text-align:center;
+    font-size:12px;
+    cursor:pointer;
+}
+
+.menu div:hover {
+    color:#00ffcc;
+}
+
 </style>
 
 </head>
 
 <body>
 
-<h1>SummitFX Dashboard</h1>
+<!-- HEADER -->
+<div class="header">
+    <div class="logo">SummitFX</div>
+    <div onclick="logout()">Logout</div>
+</div>
 
-<p id="userEmail"></p>
+<!-- SCROLLING PRICES -->
+<div class="ticker">
+<span>
+BTC $69,000 ▲3% &nbsp;&nbsp;
+ETH $2,100 ▲2% &nbsp;&nbsp;
+USDT $1.00 &nbsp;&nbsp;
+XRP $0.52 ▲1% &nbsp;&nbsp;
+XAU/USD $2,300 ▲0.8%
+</span>
+</div>
 
+<!-- BALANCE -->
 <div class="card">
-<h2>Your Balance</h2>
-<h1 id="balance">$0</h1>
+    <h3>Account Balance</h3>
+    <div class="balance" id="balance">$0</div>
+    <p style="color:#aaa;">+0.00 today</p>
+</div>
+
+<!-- PROFIT -->
+<div class="card">
+    <h3>All Time Profit</h3>
+    <div class="balance green">+318%</div>
+</div>
+
+<!-- BOTS -->
+<div class="card">
+    <h3>Active A.I Bots</h3>
+    <div class="balance">2 Running</div>
 </div>
 
 <!-- INVESTMENT PLANS -->
 <div class="card">
-<h2>Investment Plans</h2>
+<h3>Investment Plans</h3>
 
 <button onclick="selectPlan(400,8000)">$400 → $8000</button>
 <button onclick="selectPlan(500,10000)">$500 → $10000</button>
 <button onclick="selectPlan(600,12000)">$600 → $12000</button>
-<button onclick="selectPlan(700,14000)">$700 → $14000</button>
-<button onclick="selectPlan(800,16000)">$800 → $16000</button>
 
+<p id="planInfo"></p>
 </div>
 
-<!-- DEPOSIT SECTION -->
+<!-- DEPOSIT -->
 <div class="card">
-<h2>Deposit USDT (TRC20)</h2>
-
-<p>Send USDT to the address below:</p>
+<h3>Deposit USDT (TRC20)</h3>
 
 <input id="usdtAddress" value="TLEMJfnDaAqSoGWTG19WRMp2nco3qM6kDW" readonly>
 
-<br><br>
-
 <button onclick="copyAddress()">Copy Address</button>
-
-<p>After sending, wait for confirmation.</p>
-
-<p id="planInfo"></p>
 
 </div>
 
-<button onclick="logout()">Logout</button>
+<!-- MENU -->
+<div class="menu">
+<div onclick="alert('Home')">🏠<br>Home</div>
+<div onclick="alert('Invest')">📈<br>Invest</div>
+<div onclick="alert('Deposit')">💰<br>Deposit</div>
+<div onclick="alert('Withdraw')">💸<br>Withdraw</div>
+</div>
 
 <script>
 
-// ✅ YOUR REAL FIREBASE CONFIG (FIXED)
+// FIREBASE CONFIG
 const firebaseConfig = {
   apiKey: "AIzaSyAT-Yr_wusE2KKW7YpEfQpQMeJYe2WqWW0",
   authDomain: "summitfx-trading.firebaseapp.com",
@@ -97,16 +199,12 @@ const firebaseConfig = {
   measurementId: "G-HKLYNSZFT1"
 };
 
-// Initialize Firebase
 firebase.initializeApp(firebaseConfig);
-
 const db = firebase.firestore();
 
-// ✅ CORRECT AUTH CHECK (NO LOGOUT LOOP)
+// AUTH CHECK
 firebase.auth().onAuthStateChanged(function(user) {
     if (user) {
-
-        document.getElementById("userEmail").innerText = user.email;
 
         const ref = db.collection("users").doc(user.uid);
 
@@ -127,11 +225,8 @@ firebase.auth().onAuthStateChanged(function(user) {
 // COPY ADDRESS
 function copyAddress(){
     let address = document.getElementById("usdtAddress").value;
-
-    navigator.clipboard.writeText(address)
-    .then(() => {
-        alert("Address copied!");
-    });
+    navigator.clipboard.writeText(address);
+    alert("Copied!");
 }
 
 // SELECT PLAN
@@ -140,21 +235,17 @@ function selectPlan(amount, profit){
 
     if(user){
         db.collection("users").doc(user.uid).update({
-            plan: {
-                amount: amount,
-                profit: profit
-            }
+            plan: { amount, profit }
         });
 
         document.getElementById("planInfo").innerText =
-        "Selected Plan: $" + amount + " → $" + profit;
+        "Selected: $" + amount + " → $" + profit;
     }
 }
 
 // LOGOUT
 function logout(){
-    firebase.auth().signOut()
-    .then(() => {
+    firebase.auth().signOut().then(()=>{
         window.location.href = "login.html";
     });
 }
