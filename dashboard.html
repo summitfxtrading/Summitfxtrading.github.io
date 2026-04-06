@@ -1,256 +1,128 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dashboard</title>
 
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
 <style>
-body {
-    margin:0;
-    font-family:Arial;
-    background:#0b1220;
-    color:white;
-}
+body {margin:0;background:#0b1220;color:white;font-family:Arial;}
 
-/* HEADER */
 .header {
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:15px;
-    background:#111a2e;
+display:flex;
+justify-content:space-between;
+padding:15px;
+background:#111a2e;
 }
 
-.logo {
-    font-size:18px;
-    font-weight:bold;
-    color:#00ffcc;
-}
-
-/* TICKER */
 .ticker {
-    background:#1a2333;
-    padding:10px;
-    overflow:hidden;
-    white-space:nowrap;
-    font-size:14px;
+background:#1a2333;
+padding:10px;
+overflow:hidden;
+white-space:nowrap;
 }
 
 .ticker span {
-    display:inline-block;
-    padding-right:40px;
-    animation: scroll 15s linear infinite;
+display:inline-block;
+animation:scroll 12s linear infinite;
 }
 
 @keyframes scroll {
-    0% { transform: translateX(100%); }
-    100% { transform: translateX(-100%); }
+0%{transform:translateX(100%)}
+100%{transform:translateX(-100%)}
 }
 
-/* CARD */
 .card {
-    background:#1a2333;
-    margin:15px;
-    padding:20px;
-    border-radius:15px;
-    text-align:left;
+background:#1a2333;
+margin:15px;
+padding:20px;
+border-radius:12px;
 }
 
-.card h3 {
-    color:#aaa;
-    margin-bottom:10px;
-}
-
-.balance {
-    font-size:28px;
-}
-
-/* PROFIT STYLE */
-.green {
-    color:#00ffcc;
-}
-
-/* INPUT */
-input {
-    width:100%;
-    padding:12px;
-    border:none;
-    border-radius:8px;
-    margin-top:10px;
-}
-
-/* BUTTON */
-button {
-    padding:12px;
-    margin-top:10px;
-    border:none;
-    border-radius:8px;
-    cursor:pointer;
-}
-
-/* MENU */
 .menu {
-    position:fixed;
-    bottom:0;
-    width:100%;
-    background:#111a2e;
-    display:flex;
-    justify-content:space-around;
-    padding:10px 0;
+position:fixed;
+bottom:0;
+width:100%;
+display:flex;
+justify-content:space-around;
+background:#111a2e;
+padding:10px;
 }
-
-.menu div {
-    text-align:center;
-    font-size:12px;
-    cursor:pointer;
-}
-
-.menu div:hover {
-    color:#00ffcc;
-}
-
 </style>
-
 </head>
 
 <body>
 
-<!-- HEADER -->
 <div class="header">
-    <div class="logo">SummitFX</div>
-    <div onclick="logout()">Logout</div>
+<div>SummitFX</div>
+<div onclick="logout()">Logout</div>
 </div>
 
-<!-- SCROLLING PRICES -->
-<div class="ticker">
-<span>
-BTC $69,000 ▲3% &nbsp;&nbsp;
-ETH $2,100 ▲2% &nbsp;&nbsp;
-USDT $1.00 &nbsp;&nbsp;
-XRP $0.52 ▲1% &nbsp;&nbsp;
-XAU/USD $2,300 ▲0.8%
-</span>
-</div>
+<div class="ticker"><span id="prices">Loading...</span></div>
 
-<!-- BALANCE -->
 <div class="card">
-    <h3>Account Balance</h3>
-    <div class="balance" id="balance">$0</div>
-    <p style="color:#aaa;">+0.00 today</p>
+<h3>Balance</h3>
+<h1 id="balance">$0</h1>
 </div>
 
-<!-- PROFIT -->
 <div class="card">
-    <h3>All Time Profit</h3>
-    <div class="balance green">+318%</div>
+<h3>Deposit</h3>
+<input value="TLEMJfnDaAqSoGWTG19WRMp2nco3qM6kDW" id="addr" readonly>
+<button onclick="copy()">Copy</button>
 </div>
 
-<!-- BOTS -->
-<div class="card">
-    <h3>Active A.I Bots</h3>
-    <div class="balance">2 Running</div>
-</div>
-
-<!-- INVESTMENT PLANS -->
-<div class="card">
-<h3>Investment Plans</h3>
-
-<button onclick="selectPlan(400,8000)">$400 → $8000</button>
-<button onclick="selectPlan(500,10000)">$500 → $10000</button>
-<button onclick="selectPlan(600,12000)">$600 → $12000</button>
-
-<p id="planInfo"></p>
-</div>
-
-<!-- DEPOSIT -->
-<div class="card">
-<h3>Deposit USDT (TRC20)</h3>
-
-<input id="usdtAddress" value="TLEMJfnDaAqSoGWTG19WRMp2nco3qM6kDW" readonly>
-
-<button onclick="copyAddress()">Copy Address</button>
-
-</div>
-
-<!-- MENU -->
 <div class="menu">
-<div onclick="alert('Home')">🏠<br>Home</div>
-<div onclick="alert('Invest')">📈<br>Invest</div>
-<div onclick="alert('Deposit')">💰<br>Deposit</div>
-<div onclick="alert('Withdraw')">💸<br>Withdraw</div>
+<div>🏠</div>
+<div>📈</div>
+<div>💰</div>
+<div>💸</div>
 </div>
 
 <script>
-
-// FIREBASE CONFIG
 const firebaseConfig = {
-  apiKey: "AIzaSyAT-Yr_wusE2KKW7YpEfQpQMeJYe2WqWW0",
-  authDomain: "summitfx-trading.firebaseapp.com",
-  projectId: "summitfx-trading",
-  storageBucket: "summitfx-trading.firebasestorage.app",
-  messagingSenderId: "838670474162",
-  appId: "1:838670474162:web:b3d9eac185a7932a20a2ab",
-  measurementId: "G-HKLYNSZFT1"
+apiKey:"AIzaSyAT-Yr_wusE2KKW7YpEfQpQMeJYe2WqWW0",
+authDomain:"summitfx-trading.firebaseapp.com",
+projectId:"summitfx-trading",
+appId:"1:838670474162:web:b3d9eac185a7932a20a2ab"
 };
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// AUTH CHECK
-firebase.auth().onAuthStateChanged(function(user) {
-    if (user) {
-
-        const ref = db.collection("users").doc(user.uid);
-
-        ref.get().then(doc => {
-            if(doc.exists){
-                document.getElementById("balance").innerText =
-                "$" + doc.data().balance;
-            } else {
-                ref.set({balance: 0});
-            }
-        });
-
-    } else {
-        window.location.href = "login.html";
-    }
+firebase.auth().onAuthStateChanged(user=>{
+if(user){
+db.collection("users").doc(user.uid).get().then(doc=>{
+if(doc.exists){
+balance.innerText="$"+doc.data().balance;
+}
+});
+}else{
+window.location="login.html";
+}
 });
 
-// COPY ADDRESS
-function copyAddress(){
-    let address = document.getElementById("usdtAddress").value;
-    navigator.clipboard.writeText(address);
-    alert("Copied!");
-}
-
-// SELECT PLAN
-function selectPlan(amount, profit){
-    const user = firebase.auth().currentUser;
-
-    if(user){
-        db.collection("users").doc(user.uid).update({
-            plan: { amount, profit }
-        });
-
-        document.getElementById("planInfo").innerText =
-        "Selected: $" + amount + " → $" + profit;
-    }
-}
-
-// LOGOUT
 function logout(){
-    firebase.auth().signOut().then(()=>{
-        window.location.href = "login.html";
-    });
+firebase.auth().signOut().then(()=>window.location="login.html");
 }
 
+function copy(){
+navigator.clipboard.writeText(addr.value);
+alert("Copied");
+}
+
+// LIVE PRICES
+async function prices(){
+let r=await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,tether&vs_currencies=usd");
+let d=await r.json();
+
+document.getElementById("prices").innerHTML=
+`BTC $${d.bitcoin.usd} | ETH $${d.ethereum.usd} | USDT $${d.tether.usd}`;
+}
+prices();
+setInterval(prices,10000);
 </script>
 
 </body>
-</html>
+    </html>
