@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deposit - SummitFX</title>
+
+<style>
+body {
+    margin:0;
+    font-family: 'Segoe UI', Arial;
+    background: linear-gradient(180deg,#0b1220,#05080f);
+    color:white;
+}
+
+.header {
+    padding:15px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.title {
+    font-size:20px;
+    font-weight:bold;
+    background: linear-gradient(45deg,#00ffcc,#00aaff);
+    -webkit-background-clip:text;
+    color:transparent;
+}
+
+.card {
+    margin:20px;
+    padding:20px;
+    background: rgba(255,255,255,0.05);
+    border-radius:15px;
+    border:1px solid rgba(255,255,255,0.08);
+}
+
+.label {
+    color:#aaa;
+    font-size:13px;
+}
+
+.address {
+    background:#111827;
+    padding:12px;
+    border-radius:10px;
+    margin-top:10px;
+    word-break:break-all;
+}
+
+.btn {
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:10px;
+    background:linear-gradient(45deg,#00ffcc,#0099ff);
+    color:black;
+    font-weight:bold;
+    margin-top:10px;
+    cursor:pointer;
+}
+
+.qr {
+    text-align:center;
+    margin-top:15px;
+}
+
+.qr img {
+    width:200px;
+    border-radius:10px;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="header">
+    <div class="title">Deposit</div>
+    <button onclick="goBack()" style="background:none;border:none;color:white;">⬅ Back</button>
+</div>
+
+<div class="card">
+    <div class="label">Deposit Amount (USD)</div>
+    <input type="number" id="amount" placeholder="Enter amount" 
+    style="width:100%;padding:12px;border:none;border-radius:10px;margin-top:10px;background:#111827;color:white;">
+</div>
+
+<div class="card">
+    <div class="label">Send USDT (TRC20) to this address:</div>
+
+    <div class="address" id="wallet">
+        TLEMJfnDaAqSoGWTG19WRMp2nco3qM6kDW
+    </div>
+
+    <button class="btn" onclick="copyAddress()">Copy Address</button>
+
+    <div class="qr">
+        <div class="label">Scan QR Code</div>
+        <img id="qrCode">
+    </div>
+</div>
+
+<div class="card">
+    <div class="label">Instructions</div>
+    <p style="font-size:14px;color:#ccc;line-height:1.5;">
+        1. Copy the wallet address or scan the QR code<br>
+        2. Send USDT (TRC20) from your wallet<br>
+        3. Wait for confirmation (manual approval)<br>
+    </p>
+</div>
+
+<script>
+
+// WALLET ADDRESS
+const walletAddress = "TLEMJfnDaAqSoGWTG19WRMp2nco3qM6kDW";
+
+// QR CODE GENERATION
+document.getElementById("qrCode").src =
+"https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" + walletAddress;
+
+// COPY FUNCTION
+function copyAddress(){
+    navigator.clipboard.writeText(walletAddress);
+    alert("Address copied!");
+}
+
+// BACK
+function goBack(){
+    window.location = "dashboard.html";
+}
+
+</script>
+
+</body>
+  </html>
