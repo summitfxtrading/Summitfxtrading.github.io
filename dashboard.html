@@ -34,7 +34,7 @@ body {
     color:transparent;
 }
 
-/* NEW MENU BUTTON */
+/* MENU BUTTON */
 .menu-btn {
     font-size:22px;
     cursor:pointer;
@@ -50,6 +50,10 @@ body {
     overflow:hidden;
     display:none;
     box-shadow:0 5px 20px rgba(0,0,0,0.5);
+}
+
+.dropdown.show {
+    display:block;
 }
 
 .dropdown div {
@@ -146,7 +150,7 @@ input {
     font-weight:bold;
 }
 
-/* MENU */
+/* BOTTOM MENU */
 .menu {
     position:fixed;
     bottom:0;
@@ -241,7 +245,7 @@ input {
 <button class="btn" onclick="copyAddress()">Copy Address</button>
 </div>
 
-<!-- MENU -->
+<!-- BOTTOM MENU -->
 <div class="menu">
 <div>🏠<br>Home</div>
 <div>📊<br>Markets</div>
@@ -251,11 +255,20 @@ input {
 
 <script>
 
-// TOGGLE MENU
+// MENU TOGGLE
 function toggleMenu(){
-    const menu = document.getElementById("dropdownMenu");
-    menu.style.display = menu.style.display === "block" ? "none" : "block";
+    document.getElementById("dropdownMenu").classList.toggle("show");
 }
+
+// CLOSE WHEN CLICK OUTSIDE
+document.addEventListener("click", function(e){
+    const menu = document.getElementById("dropdownMenu");
+    const btn = document.querySelector(".menu-btn");
+
+    if(!menu.contains(e.target) && !btn.contains(e.target)){
+        menu.classList.remove("show");
+    }
+});
 
 // FIREBASE CONFIG
 const firebaseConfig = {
