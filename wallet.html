@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wallet - SummitFX</title>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+<style>
+body {
+    margin:0;
+    font-family: Arial;
+    background: linear-gradient(180deg,#0b1220,#05080f);
+    color:white;
+}
+
+.header {
+    padding:15px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.title {
+    font-size:20px;
+    font-weight:bold;
+    background: linear-gradient(45deg,#00ffcc,#00aaff);
+    -webkit-background-clip:text;
+    color:transparent;
+}
+
+.card {
+    margin:15px;
+    padding:20px;
+    background: rgba(255,255,255,0.05);
+    border-radius:15px;
+    border:1px solid rgba(255,255,255,0.08);
+}
+
+.big {
+    font-size:28px;
+    margin-top:5px;
+}
+
+.actions {
+    display:flex;
+    gap:10px;
+}
+
+.actions button {
+    flex:1;
+    padding:12px;
+    border:none;
+    border-radius:10px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.deposit {
+    background: linear-gradient(45deg,#00ffcc,#0099ff);
+    color:black;
+}
+
+.withdraw {
+    background:#111827;
+    color:white;
+}
+
+.transaction {
+    padding:10px;
+    border-bottom:1px solid #222;
+    font-size:14px;
+}
+
+.green { color:#00ffcc; }
+.red { color:#ff4d4d; }
+
+</style>
+
+</head>
+
+<body>
+
+<div class="header">
+    <div class="title">Wallet</div>
+    <button onclick="goBack()" style="background:none;border:none;color:white;">⬅ Back</button>
+</div>
+
+<!-- BALANCE -->
+<div class="card">
+    <div>Total Balance</div>
+    <div class="big" id="balance">$0</div>
+</div>
+
+<!-- BREAKDOWN -->
+<div class="card">
+    <div>Available: <span id="available">$0</span></div>
+    <div>Invested: <span id="invested">$0</span></div>
+    <div>Profit: <span id="profit">$0</span></div>
+</div>
+
+<!-- ACTIONS -->
+<div class="card actions">
+    <button class="deposit" onclick="window.location='deposit.html'">Deposit</button>
+    <button class="withdraw" onclick="window.location='withdraw.html'">Withdraw</button>
+</div>
+
+<!-- TRANSACTIONS -->
+<div class="card">
+    <h3>Transaction History</h3>
+    <div id="transactions">Loading...</div>
+</div>
+
+<script>
+
+// FIREBASE CONFIG
+const firebaseConfig = {
+  apiKey: "AIzaSyAT-Yr_wusE2KKW7YpEfQpQMeJYe2WqWW0",
+  authDomain: "summitfx-trading.firebaseapp.com",
+  projectId: "summitfx-trading",
+  storageBucket: "summitfx-trading.appspot.com",
+  messagingSenderId: "838670474162",
+  appId: "1:838670474162:web:b3d9eac185a7932a20a2ab"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const db = firebase.firestore();
+
+// AUTH CHECK
+firebase.auth().onAuthStateChanged(user=>{
+    if(!user){
+        window.location = "login.html";
+    } else {
+        loadBalance(user.uid);
+        loadTransactions(user.uid);
+    }
+});
+
+// LOAD BALANCE
+function loadBalance(uid){
+    db.collection("users").doc(uid).get().then(doc=>{
+        if(doc.exists){
+            let data = doc.data();
+
+            let balance = data.balance || 0;
+            let invested = data.invested || 0;
+            let profit = data.profit || 0;
+
+            document.getElementById("balance").innerText = "$" + balance;
+            document.getElementById("available").innerText = "$" + (balance - invested);
+            document.getElementById("invested").innerText = "$" + invested;
+            document.getElementById("profit").innerText = "$" + profit;
+        }
+    });
+}
+
+// LOAD TRANSACTIONS
+function loadTransactions(uid){
+    db.collection("withdrawals")
+    .where("userId","==",uid)
+    .orderBy("createdAt","desc")
+    .limit(10)
+    .get()
+    .then(snapshot=>{
+        let html = "";
+
+        if(snapshot.empty){
+            html = "No transactions yet";
+        }
+
+        snapshot.forEach(doc=>{
+            let t = doc.data();
+
+            html += `
+            <div class="transaction">
+                <span class="red">- $${t.amount}</span> 
+                ${t.currency.toUpperCase()} (${t.network || ''})<br>
+                <small>${new Date(t.createdAt).toLocaleString()}</small>
+            </div>
+            `;
+        });
+
+        document.getElementById("transactions").innerHTML = html;
+    });
+}
+
+// BACK
+function goBack(){
+    window.location = "dashboard.html";
+}
+
+</script>
+
+</body>
+  </html>
