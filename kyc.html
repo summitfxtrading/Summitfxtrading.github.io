@@ -42,8 +42,14 @@ body {
     border:1px solid rgba(255,255,255,0.08);
 }
 
-input[type="file"] {
+select, input {
+    width:100%;
+    padding:12px;
     margin-top:10px;
+    border:none;
+    border-radius:10px;
+    background:#111827;
+    color:white;
 }
 
 .btn {
@@ -59,13 +65,14 @@ input[type="file"] {
 }
 
 .status {
-    margin-top:10px;
+    margin-top:15px;
     font-weight:bold;
+    text-align:center;
 }
 
-.pending { color: orange; }
-.approved { color: #00ffcc; }
-.rejected { color: red; }
+.waiting {
+    color: orange;
+}
 </style>
 
 </head>
@@ -78,13 +85,28 @@ input[type="file"] {
 </div>
 
 <div class="card">
-    <p>Upload a valid ID (Passport / ID Card / Driver’s License)</p>
 
-    <input type="file" id="fileInput">
+    <label>Select Document Type</label>
+    <select id="docType" onchange="updateUI()">
+        <option value="">-- Select --</option>
+        <option value="id">National ID</option>
+        <option value="passport">Passport</option>
+    </select>
 
-    <button class="btn" onclick="uploadKYC()">Submit KYC</button>
+    <div id="uploadSection" style="display:none;">
 
-    <div class="status" id="statusText">Status: Not Submitted</div>
+        <label>Front Image</label>
+        <input type="file" id="frontFile" accept="image/*" capture="environment">
+
+        <label>Back Image</label>
+        <input type="file" id="backFile" accept="image/*" capture="environment">
+
+        <button class="btn" onclick="uploadKYC()">Submit KYC</button>
+
+    </div>
+
+    <div class="status" id="statusText"></div>
+
 </div>
 
 <script>
@@ -113,58 +135,66 @@ firebase.auth().onAuthStateChanged(user=>{
     }
 });
 
+// SHOW UI BASED ON SELECTION
+function updateUI(){
+    let type = document.getElementById("docType").value;
+
+    if(type){
+        document.getElementById("uploadSection").style.display = "block";
+    } else {
+        document.getElementById("uploadSection").style.display = "none";
+    }
+}
+
 // LOAD STATUS
 function loadStatus(uid){
     db.collection("kyc").doc(uid).get()
     .then(doc=>{
         if(doc.exists){
             let data = doc.data();
-            showStatus(data.status);
+            document.getElementById("statusText").innerHTML =
+                "Status: <span class='waiting'>Waiting for verification...</span>";
         }
     });
-}
-
-function showStatus(status){
-    let el = document.getElementById("statusText");
-
-    if(status === "pending"){
-        el.innerHTML = "Status: <span class='pending'>Pending</span>";
-    } else if(status === "approved"){
-        el.innerHTML = "Status: <span class='approved'>Approved</span>";
-    } else if(status === "rejected"){
-        el.innerHTML = "Status: <span class='rejected'>Rejected</span>";
-    }
 }
 
 // UPLOAD KYC
 function uploadKYC(){
     let user = firebase.auth().currentUser;
-    let file = document.getElementById("fileInput").files[0];
+    let type = document.getElementById("docType").value;
+    let front = document.getElementById("frontFile").files[0];
+    let back = document.getElementById("backFile").files[0];
 
-    if(!file){
-        alert("Please select a file");
+    if(!type || !front || !back){
+        alert("Please complete all fields");
         return;
     }
 
-    let ref = storage.ref("kyc/" + user.uid + "/" + file.name);
+    let frontRef = storage.ref(`kyc/${user.uid}/front_${Date.now()}`);
+    let backRef = storage.ref(`kyc/${user.uid}/back_${Date.now()}`);
 
-    let uploadTask = ref.put(file);
+    frontRef.put(front).then(()=>{
+        backRef.put(back).then(()=>{
 
-    uploadTask.on("state_changed", null, error=>{
-        alert(error.message);
-    }, ()=>{
-        uploadTask.snapshot.ref.getDownloadURL()
-        .then(url=>{
+            Promise.all([
+                frontRef.getDownloadURL(),
+                backRef.getDownloadURL()
+            ]).then(urls=>{
 
-            db.collection("kyc").doc(user.uid).set({
-                imageUrl: url,
-                status: "pending",
-                timestamp: Date.now()
+                db.collection("kyc").doc(user.uid).set({
+                    type: type,
+                    frontUrl: urls[0],
+                    backUrl: urls[1],
+                    status: "pending",
+                    timestamp: Date.now()
+                });
+
+                document.getElementById("statusText").innerHTML =
+                    "<span class='waiting'>Waiting for verification...</span>";
+
+                alert("KYC submitted. Please wait for verification.");
             });
 
-            showStatus("pending");
-
-            alert("KYC submitted successfully!");
         });
     });
 }
