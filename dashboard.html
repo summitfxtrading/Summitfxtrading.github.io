@@ -34,6 +34,35 @@ body {
     color:transparent;
 }
 
+/* NEW MENU BUTTON */
+.menu-btn {
+    font-size:22px;
+    cursor:pointer;
+}
+
+/* DROPDOWN MENU */
+.dropdown {
+    position:absolute;
+    top:60px;
+    right:15px;
+    background:#111827;
+    border-radius:10px;
+    overflow:hidden;
+    display:none;
+    box-shadow:0 5px 20px rgba(0,0,0,0.5);
+}
+
+.dropdown div {
+    padding:12px 20px;
+    border-bottom:1px solid #222;
+    cursor:pointer;
+}
+
+.dropdown div:hover {
+    background:#1f2937;
+    color:#00ffcc;
+}
+
 /* TICKER */
 .ticker {
     background:#111827;
@@ -148,6 +177,16 @@ input {
 <!-- HEADER -->
 <div class="header">
     <div class="logo">SummitFX</div>
+    <div class="menu-btn" onclick="toggleMenu()">☰</div>
+</div>
+
+<!-- DROPDOWN MENU -->
+<div class="dropdown" id="dropdownMenu">
+    <div onclick="alert('My Profile')">My Profile</div>
+    <div onclick="alert('Edit Profile')">Edit Profile</div>
+    <div onclick="alert('Withdraw')">Withdraw</div>
+    <div onclick="alert('Deposit')">Deposit</div>
+    <div onclick="alert('Verify KYC')">Verify KYC</div>
     <div onclick="logout()">Logout</div>
 </div>
 
@@ -212,6 +251,12 @@ input {
 
 <script>
 
+// TOGGLE MENU
+function toggleMenu(){
+    const menu = document.getElementById("dropdownMenu");
+    menu.style.display = menu.style.display === "block" ? "none" : "block";
+}
+
 // FIREBASE CONFIG
 const firebaseConfig = {
   apiKey: "AIzaSyAT-Yr_wusE2KKW7YpEfQpQMeJYe2WqWW0",
@@ -232,7 +277,7 @@ const ref = db.collection("users").doc(user.uid);
 
 ref.get().then(doc=>{
 if(doc.exists){
-balance.innerText = "$" + doc.data().balance;
+document.getElementById("balance").innerText = "$" + doc.data().balance;
 }else{
 ref.set({balance:0});
 }
@@ -285,4 +330,4 @@ firebase.auth().signOut().then(()=>window.location="login.html");
 </script>
 
 </body>
-    </html>
+</html>
