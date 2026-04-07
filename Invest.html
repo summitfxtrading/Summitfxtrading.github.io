@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Invest - SummitFX</title>
+
+<style>
+body {
+    margin:0;
+    font-family: Arial;
+    background: linear-gradient(180deg,#0b1220,#05080f);
+    color:white;
+}
+
+.header {
+    padding:15px;
+    display:flex;
+    justify-content:space-between;
+}
+
+.title {
+    font-size:20px;
+    font-weight:bold;
+    background: linear-gradient(45deg,#00ffcc,#00aaff);
+    -webkit-background-clip:text;
+    color:transparent;
+}
+
+.card {
+    margin:15px;
+    padding:20px;
+    border-radius:15px;
+    background: rgba(255,255,255,0.05);
+    border:1px solid rgba(255,255,255,0.08);
+}
+
+.plan {
+    display:flex;
+    justify-content:space-between;
+    padding:12px;
+    margin-top:10px;
+    border-radius:10px;
+    background:#111827;
+    cursor:pointer;
+}
+
+.plan:hover {
+    background:#1f2937;
+}
+
+.green {
+    color:#00ffcc;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <div class="title">Investment Plans</div>
+    <button onclick="goBack()" style="background:none;border:none;color:white;">⬅</button>
+</div>
+
+<!-- 24 HOURS -->
+<div class="card">
+    <h3>24 Hour Plans</h3>
+
+    <div class="plan" onclick="selectPlan(400,8000,'24 Hours')">
+        <span>$400</span>
+        <span class="green">$8000</span>
+    </div>
+
+    <div class="plan" onclick="selectPlan(500,10000,'24 Hours')">
+        <span>$500</span>
+        <span class="green">$10000</span>
+    </div>
+
+    <div class="plan" onclick="selectPlan(600,12000,'24 Hours')">
+        <span>$600</span>
+        <span class="green">$12000</span>
+    </div>
+
+    <div class="plan" onclick="selectPlan(700,14000,'24 Hours')">
+        <span>$700</span>
+        <span class="green">$14000</span>
+    </div>
+
+    <div class="plan" onclick="selectPlan(800,16000,'24 Hours')">
+        <span>$800</span>
+        <span class="green">$16000</span>
+    </div>
+
+</div>
+
+<!-- 3 DAYS -->
+<div class="card">
+    <h3>3 Days Plans</h3>
+
+    <div class="plan" onclick="selectPlan(1000,30000,'3 Days')">
+        <span>$1000</span>
+        <span class="green">$30000</span>
+    </div>
+
+    <div class="plan" onclick="selectPlan(2000,60000,'3 Days')">
+        <span>$2000</span>
+        <span class="green">$60000</span>
+    </div>
+
+    <div class="plan" onclick="selectPlan(3000,90000,'3 Days')">
+        <span>$3000</span>
+        <span class="green">$90000</span>
+    </div>
+
+    <div class="plan" onclick="selectPlan(4000,120000,'3 Days')">
+        <span>$4000</span>
+        <span class="green">$120000</span>
+    </div>
+
+    <div class="plan" onclick="selectPlan(5000,150000,'3 Days')">
+        <span>$5000</span>
+        <span class="green">$150000</span>
+    </div>
+
+</div>
+
+<script>
+
+function selectPlan(amount, profit, duration){
+    // Save plan temporarily
+    localStorage.setItem("plan", JSON.stringify({
+        amount, profit, duration
+    }));
+
+    // Go to details page
+    window.location = "plan.html";
+}
+
+function goBack(){
+    window.location = "dashboard.html";
+}
+
+</script>
+
+</body>
+  </html>
