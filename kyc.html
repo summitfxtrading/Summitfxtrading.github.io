@@ -66,8 +66,8 @@ select, input {
 
 .status {
     margin-top:15px;
-    font-weight:bold;
     text-align:center;
+    font-weight:bold;
 }
 
 .waiting {
@@ -87,13 +87,13 @@ select, input {
 <div class="card">
 
     <label>Select Document Type</label>
-    <select id="docType" onchange="updateUI()">
+    <select id="docType" onchange="toggleUpload()">
         <option value="">-- Select --</option>
         <option value="id">National ID</option>
         <option value="passport">Passport</option>
     </select>
 
-    <div id="uploadSection" style="display:none;">
+    <div id="uploadBox" style="display:none;">
 
         <label>Front Image</label>
         <input type="file" id="frontFile" accept="image/*" capture="environment">
@@ -101,7 +101,7 @@ select, input {
         <label>Back Image</label>
         <input type="file" id="backFile" accept="image/*" capture="environment">
 
-        <button class="btn" onclick="uploadKYC()">Submit KYC</button>
+        <button class="btn" onclick="submitKYC()">Submit KYC</button>
 
     </div>
 
@@ -126,77 +126,75 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const storage = firebase.storage();
 
-// CHECK USER
+// AUTH CHECK
 firebase.auth().onAuthStateChanged(user=>{
-    if(user){
-        loadStatus(user.uid);
-    } else {
+    if(!user){
         window.location = "login.html";
+    } else {
+        checkStatus(user.uid);
     }
 });
 
-// SHOW UI BASED ON SELECTION
-function updateUI(){
-    let type = document.getElementById("docType").value;
-
-    if(type){
-        document.getElementById("uploadSection").style.display = "block";
-    } else {
-        document.getElementById("uploadSection").style.display = "none";
-    }
+// SHOW UPLOAD SECTION
+function toggleUpload(){
+    let val = document.getElementById("docType").value;
+    document.getElementById("uploadBox").style.display = val ? "block" : "none";
 }
 
-// LOAD STATUS
-function loadStatus(uid){
-    db.collection("kyc").doc(uid).get()
-    .then(doc=>{
+// CHECK STATUS
+function checkStatus(uid){
+    db.collection("kyc").doc(uid).get().then(doc=>{
         if(doc.exists){
-            let data = doc.data();
             document.getElementById("statusText").innerHTML =
-                "Status: <span class='waiting'>Waiting for verification...</span>";
+            "<span class='waiting'>Status: Waiting for verification...</span>";
         }
     });
 }
 
-// UPLOAD KYC
-function uploadKYC(){
+// SUBMIT KYC (FIXED)
+async function submitKYC(){
+
     let user = firebase.auth().currentUser;
     let type = document.getElementById("docType").value;
     let front = document.getElementById("frontFile").files[0];
     let back = document.getElementById("backFile").files[0];
 
     if(!type || !front || !back){
-        alert("Please complete all fields");
+        alert("Please fill all fields");
         return;
     }
 
-    let frontRef = storage.ref(`kyc/${user.uid}/front_${Date.now()}`);
-    let backRef = storage.ref(`kyc/${user.uid}/back_${Date.now()}`);
+    try {
 
-    frontRef.put(front).then(()=>{
-        backRef.put(back).then(()=>{
+        let frontRef = storage.ref(`kyc/${user.uid}/front_${Date.now()}`);
+        let backRef = storage.ref(`kyc/${user.uid}/back_${Date.now()}`);
 
-            Promise.all([
-                frontRef.getDownloadURL(),
-                backRef.getDownloadURL()
-            ]).then(urls=>{
+        // Upload both files
+        await frontRef.put(front);
+        await backRef.put(back);
 
-                db.collection("kyc").doc(user.uid).set({
-                    type: type,
-                    frontUrl: urls[0],
-                    backUrl: urls[1],
-                    status: "pending",
-                    timestamp: Date.now()
-                });
+        // Get URLs
+        let frontURL = await frontRef.getDownloadURL();
+        let backURL = await backRef.getDownloadURL();
 
-                document.getElementById("statusText").innerHTML =
-                    "<span class='waiting'>Waiting for verification...</span>";
-
-                alert("KYC submitted. Please wait for verification.");
-            });
-
+        // Save to Firestore
+        await db.collection("kyc").doc(user.uid).set({
+            type: type,
+            frontUrl: frontURL,
+            backUrl: backURL,
+            status: "pending",
+            createdAt: Date.now()
         });
-    });
+
+        document.getElementById("statusText").innerHTML =
+        "<span class='waiting'>KYC Submitted. Waiting for verification...</span>";
+
+        alert("KYC submitted successfully!");
+
+    } catch (error) {
+        console.error(error);
+        alert("Upload failed: " + error.message);
+    }
 }
 
 // BACK
@@ -207,4 +205,4 @@ function goBack(){
 </script>
 
 </body>
-</html>
+    </html>
