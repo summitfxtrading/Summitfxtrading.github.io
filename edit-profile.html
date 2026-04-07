@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Edit Profile - SummitFX</title>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+<style>
+body {
+    margin:0;
+    font-family: 'Segoe UI', Arial;
+    background: linear-gradient(180deg,#0b1220,#05080f);
+    color:white;
+}
+
+.header {
+    padding:15px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.title {
+    font-size:20px;
+    font-weight:bold;
+    background: linear-gradient(45deg,#00ffcc,#00aaff);
+    -webkit-background-clip:text;
+    color:transparent;
+}
+
+.card {
+    margin:20px;
+    padding:20px;
+    background: rgba(255,255,255,0.05);
+    border-radius:15px;
+    border:1px solid rgba(255,255,255,0.08);
+}
+
+.label {
+    color:#aaa;
+    font-size:13px;
+}
+
+input {
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:10px;
+    margin-top:10px;
+    background:#111827;
+    color:white;
+}
+
+.btn {
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:10px;
+    background:linear-gradient(45deg,#00ffcc,#0099ff);
+    color:black;
+    font-weight:bold;
+    margin-top:10px;
+    cursor:pointer;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="header">
+    <div class="title">Edit Profile</div>
+    <button onclick="goBack()" style="background:none;border:none;color:white;">⬅ Back</button>
+</div>
+
+<div class="card">
+    <div class="label">Email (cannot be changed here)</div>
+    <input id="email" disabled>
+
+    <div class="label">Display Name</div>
+    <input id="name" placeholder="Enter your name">
+
+    <button class="btn" onclick="updateProfile()">Save Changes</button>
+</div>
+
+<div class="card">
+    <div class="label">Change Password</div>
+    <input type="password" id="newPassword" placeholder="New password">
+    <button class="btn" onclick="updatePassword()">Update Password</button>
+</div>
+
+<script>
+
+// FIREBASE CONFIG
+const firebaseConfig = {
+  apiKey: "AIzaSyAT-Yr_wusE2KKW7YpEfQpQMeJYe2WqWW0",
+  authDomain: "summitfx-trading.firebaseapp.com",
+  projectId: "summitfx-trading",
+  storageBucket: "summitfx-trading.firebasestorage.app",
+  messagingSenderId: "838670474162",
+  appId: "1:838670474162:web:b3d9eac185a7932a20a2ab"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// LOAD USER DATA
+firebase.auth().onAuthStateChanged(user=>{
+    if(user){
+        document.getElementById("email").value = user.email;
+
+        db.collection("users").doc(user.uid).get()
+        .then(doc=>{
+            if(doc.exists){
+                let data = doc.data();
+                document.getElementById("name").value = data.name || "";
+            }
+        });
+
+    } else {
+        window.location = "login.html";
+    }
+});
+
+// SAVE PROFILE
+function updateProfile(){
+    let user = firebase.auth().currentUser;
+    let name = document.getElementById("name").value;
+
+    if(!name){
+        alert("Enter your name");
+        return;
+    }
+
+    db.collection("users").doc(user.uid).update({
+        name: name
+    }).then(()=>{
+        alert("Profile updated");
+    }).catch(err=>{
+        alert(err.message);
+    });
+}
+
+// UPDATE PASSWORD
+function updatePassword(){
+    let user = firebase.auth().currentUser;
+    let newPass = document.getElementById("newPassword").value;
+
+    if(!newPass){
+        alert("Enter a password");
+        return;
+    }
+
+    user.updatePassword(newPass)
+    .then(()=>{
+        alert("Password updated successfully");
+    })
+    .catch(err=>{
+        alert(err.message);
+    });
+}
+
+// BACK
+function goBack(){
+    window.location = "dashboard.html";
+}
+
+</script>
+
+</body>
+</html>
