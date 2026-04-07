@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Profile - SummitFX</title>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+<style>
+body {
+    margin:0;
+    font-family: 'Segoe UI', Arial;
+    background: linear-gradient(180deg,#0b1220,#05080f);
+    color:white;
+}
+
+/* HEADER */
+.header {
+    padding:15px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.title {
+    font-size:20px;
+    font-weight:bold;
+    background: linear-gradient(45deg,#00ffcc,#00aaff);
+    -webkit-background-clip:text;
+    color:transparent;
+}
+
+/* CARD */
+.card {
+    margin:20px;
+    padding:20px;
+    background: rgba(255,255,255,0.05);
+    border-radius:15px;
+    border:1px solid rgba(255,255,255,0.08);
+}
+
+/* TEXT */
+.label {
+    color:#aaa;
+    font-size:13px;
+}
+
+.value {
+    font-size:18px;
+    margin-bottom:10px;
+}
+
+/* BUTTON */
+.btn {
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:10px;
+    background:linear-gradient(45deg,#00ffcc,#0099ff);
+    color:black;
+    font-weight:bold;
+    margin-top:10px;
+    cursor:pointer;
+}
+
+/* INPUT */
+input {
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:10px;
+    margin-top:10px;
+    background:#111827;
+    color:white;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <div class="title">My Profile</div>
+    <button onclick="goBack()" style="background:none;border:none;color:white;font-size:16px;">⬅ Back</button>
+</div>
+
+<div class="card">
+    <div class="label">Email</div>
+    <div class="value" id="email">Loading...</div>
+
+    <div class="label">Account Balance</div>
+    <div class="value" id="balance">$0</div>
+
+    <div class="label">Active Plan</div>
+    <div class="value" id="plan">No plan selected</div>
+</div>
+
+<div class="card">
+    <div class="label">Update Password</div>
+    <input type="password" id="newPassword" placeholder="New Password">
+    <button class="btn" onclick="updatePassword()">Update Password</button>
+</div>
+
+<div class="card">
+    <button class="btn" onclick="logout()">Logout</button>
+</div>
+
+<script>
+
+// FIREBASE CONFIG (same as dashboard)
+const firebaseConfig = {
+  apiKey: "AIzaSyAT-Yr_wusE2KKW7YpEfQpQMeJYe2WqWW0",
+  authDomain: "summitfx-trading.firebaseapp.com",
+  projectId: "summitfx-trading",
+  storageBucket: "summitfx-trading.firebasestorage.app",
+  messagingSenderId: "838670474162",
+  appId: "1:838670474162:web:b3d9eac185a7932a20a2ab"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// CHECK USER
+firebase.auth().onAuthStateChanged(user => {
+    if(user){
+        document.getElementById("email").innerText = user.email;
+
+        const ref = db.collection("users").doc(user.uid);
+
+        ref.get().then(doc=>{
+            if(doc.exists){
+                let data = doc.data();
+
+                document.getElementById("balance").innerText = "$" + (data.balance || 0);
+
+                if(data.plan){
+                    document.getElementById("plan").innerText =
+                    `$${data.plan.amount} → $${data.plan.profit}`;
+                }
+            }
+        });
+
+    } else {
+        window.location = "login.html";
+    }
+});
+
+// UPDATE PASSWORD
+function updatePassword(){
+    let user = firebase.auth().currentUser;
+    let newPass = document.getElementById("newPassword").value;
+
+    if(!newPass){
+        alert("Enter a password");
+        return;
+    }
+
+    user.updatePassword(newPass)
+    .then(()=>{
+        alert("Password updated successfully");
+    })
+    .catch(err=>{
+        alert(err.message);
+    });
+}
+
+// LOGOUT
+function logout(){
+    firebase.auth().signOut()
+    .then(()=> window.location = "login.html");
+}
+
+// BACK
+function goBack(){
+    window.location = "dashboard.html";
+}
+
+</script>
+
+</body>
+  </html>
