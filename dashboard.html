@@ -42,7 +42,7 @@ body {
     cursor:pointer;
 }
 
-/* DROPDOWN MENU (FIXED) */
+/* DROPDOWN MENU */
 .dropdown {
     display:none;
     position:fixed;
@@ -177,7 +177,6 @@ input {
 
 <body>
 
-<!-- HEADER -->
 <div class="header">
     <div class="logo">SummitFX</div>
     <div class="menu-btn" onclick="toggleMenu()">☰</div>
@@ -185,27 +184,24 @@ input {
 
 <!-- DROPDOWN MENU -->
 <div class="dropdown" id="dropdownMenu">
-    <div onclick="alert('My Profile')">My Profile</div>
-    <div onclick="alert('Edit Profile')">Edit Profile</div>
-    <div onclick="alert('Withdraw')">Withdraw</div>
-    <div onclick="alert('Deposit')">Deposit</div>
-    <div onclick="alert('Verify KYC')">Verify KYC</div>
+    <div onclick="goTo('profile.html')">My Profile</div>
+    <div onclick="goTo('edit-profile.html')">Edit Profile</div>
+    <div onclick="goTo('withdraw.html')">Withdraw</div>
+    <div onclick="goTo('deposit.html')">Deposit</div>
+    <div onclick="goTo('kyc.html')">Verify KYC</div>
     <div onclick="logout()">Logout</div>
 </div>
 
-<!-- LIVE TICKER -->
 <div class="ticker">
     <span id="prices">Loading live prices...</span>
 </div>
 
-<!-- BALANCE -->
 <div class="card">
     <div class="title">Account Balance</div>
     <div class="big" id="balance">$0</div>
     <div class="title">+0.00 today</div>
 </div>
 
-<!-- STATS -->
 <div class="card">
     <div class="title">All Time Profit</div>
     <div class="big green">+318%</div>
@@ -216,15 +212,13 @@ input {
     <div class="big">2 Running</div>
 </div>
 
-<!-- ACTION BUTTONS -->
 <div class="actions">
-    <button onclick="alert('Deposit')">💰<br>Deposit</button>
-    <button onclick="alert('Invest')">📈<br>Invest</button>
-    <button onclick="alert('Withdraw')">💸<br>Withdraw</button>
-    <button onclick="alert('Profile')">👤<br>Profile</button>
+    <button onclick="goTo('deposit.html')">💰<br>Deposit</button>
+    <button onclick="goTo('invest.html')">📈<br>Invest</button>
+    <button onclick="goTo('withdraw.html')">💸<br>Withdraw</button>
+    <button onclick="goTo('profile.html')">👤<br>Profile</button>
 </div>
 
-<!-- INVESTMENT -->
 <div class="card">
 <div class="title">Investment Plans</div>
 
@@ -235,7 +229,6 @@ input {
 <p id="planInfo"></p>
 </div>
 
-<!-- DEPOSIT -->
 <div class="card">
 <div class="title">Deposit USDT (TRC20)</div>
 
@@ -244,28 +237,21 @@ input {
 <button class="btn" onclick="copyAddress()">Copy Address</button>
 </div>
 
-<!-- BOTTOM MENU -->
 <div class="menu">
-<div>🏠<br>Home</div>
-<div>📊<br>Markets</div>
-<div>💰<br>Wallet</div>
-<div>⚙️<br>Settings</div>
+<div onclick="goTo('dashboard.html')">🏠<br>Home</div>
+<div onclick="goTo('markets.html')">📊<br>Markets</div>
+<div onclick="goTo('wallet.html')">💰<br>Wallet</div>
+<div onclick="goTo('settings.html')">⚙️<br>Settings</div>
 </div>
 
 <script>
 
-// MENU TOGGLE (FINAL FIX)
+// MENU
 function toggleMenu(){
     const menu = document.getElementById("dropdownMenu");
-
-    if(menu.style.display === "block"){
-        menu.style.display = "none";
-    } else {
-        menu.style.display = "block";
-    }
+    menu.style.display = (menu.style.display === "block") ? "none" : "block";
 }
 
-// CLOSE WHEN CLICK OUTSIDE
 document.addEventListener("click", function(e){
     const menu = document.getElementById("dropdownMenu");
     const btn = document.querySelector(".menu-btn");
@@ -275,7 +261,12 @@ document.addEventListener("click", function(e){
     }
 });
 
-// FIREBASE CONFIG
+// NAVIGATION FUNCTION (NEW)
+function goTo(page){
+    window.location.href = page;
+}
+
+// FIREBASE
 const firebaseConfig = {
   apiKey: "AIzaSyAT-Yr_wusE2KKW7YpEfQpQMeJYe2WqWW0",
   authDomain: "summitfx-trading.firebaseapp.com",
@@ -305,17 +296,14 @@ window.location="login.html";
 }
 });
 
-// LIVE PRICES
+// PRICES
 async function loadPrices(){
 try{
 let r = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,tether,ripple&vs_currencies=usd&include_24hr_change=true");
 let d = await r.json();
 
 document.getElementById("prices").innerHTML =
-`BTC $${d.bitcoin.usd} (${d.bitcoin.usd_24h_change.toFixed(2)}%) &nbsp;&nbsp;
-ETH $${d.ethereum.usd} (${d.ethereum.usd_24h_change.toFixed(2)}%) &nbsp;&nbsp;
-USDT $${d.tether.usd} &nbsp;&nbsp;
-XRP $${d.ripple.usd}`;
+`BTC $${d.bitcoin.usd} &nbsp;&nbsp; ETH $${d.ethereum.usd} &nbsp;&nbsp; USDT $${d.tether.usd}`;
 }catch{
 document.getElementById("prices").innerText="Error loading prices";
 }
@@ -348,4 +336,4 @@ firebase.auth().signOut().then(()=>window.location="login.html");
 </script>
 
 </body>
-</html>
+    </html>
