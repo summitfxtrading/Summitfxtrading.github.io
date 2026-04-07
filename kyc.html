@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KYC Verification - SummitFX</title>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+
+<style>
+body {
+    margin:0;
+    font-family: Arial;
+    background: linear-gradient(180deg,#0b1220,#05080f);
+    color:white;
+}
+
+.header {
+    padding:15px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.title {
+    font-size:20px;
+    font-weight:bold;
+    background: linear-gradient(45deg,#00ffcc,#00aaff);
+    -webkit-background-clip:text;
+    color:transparent;
+}
+
+.card {
+    margin:20px;
+    padding:20px;
+    background: rgba(255,255,255,0.05);
+    border-radius:15px;
+    border:1px solid rgba(255,255,255,0.08);
+}
+
+input[type="file"] {
+    margin-top:10px;
+}
+
+.btn {
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:10px;
+    background:linear-gradient(45deg,#00ffcc,#0099ff);
+    color:black;
+    font-weight:bold;
+    margin-top:10px;
+    cursor:pointer;
+}
+
+.status {
+    margin-top:10px;
+    font-weight:bold;
+}
+
+.pending { color: orange; }
+.approved { color: #00ffcc; }
+.rejected { color: red; }
+</style>
+
+</head>
+
+<body>
+
+<div class="header">
+    <div class="title">KYC Verification</div>
+    <button onclick="goBack()" style="background:none;border:none;color:white;">⬅ Back</button>
+</div>
+
+<div class="card">
+    <p>Upload a valid ID (Passport / ID Card / Driver’s License)</p>
+
+    <input type="file" id="fileInput">
+
+    <button class="btn" onclick="uploadKYC()">Submit KYC</button>
+
+    <div class="status" id="statusText">Status: Not Submitted</div>
+</div>
+
+<script>
+
+// FIREBASE CONFIG
+const firebaseConfig = {
+  apiKey: "AIzaSyAT-Yr_wusE2KKW7YpEfQpQMeJYe2WqWW0",
+  authDomain: "summitfx-trading.firebaseapp.com",
+  projectId: "summitfx-trading",
+  storageBucket: "summitfx-trading.appspot.com",
+  messagingSenderId: "838670474162",
+  appId: "1:838670474162:web:b3d9eac185a7932a20a2ab"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const db = firebase.firestore();
+const storage = firebase.storage();
+
+// CHECK USER
+firebase.auth().onAuthStateChanged(user=>{
+    if(user){
+        loadStatus(user.uid);
+    } else {
+        window.location = "login.html";
+    }
+});
+
+// LOAD STATUS
+function loadStatus(uid){
+    db.collection("kyc").doc(uid).get()
+    .then(doc=>{
+        if(doc.exists){
+            let data = doc.data();
+            showStatus(data.status);
+        }
+    });
+}
+
+function showStatus(status){
+    let el = document.getElementById("statusText");
+
+    if(status === "pending"){
+        el.innerHTML = "Status: <span class='pending'>Pending</span>";
+    } else if(status === "approved"){
+        el.innerHTML = "Status: <span class='approved'>Approved</span>";
+    } else if(status === "rejected"){
+        el.innerHTML = "Status: <span class='rejected'>Rejected</span>";
+    }
+}
+
+// UPLOAD KYC
+function uploadKYC(){
+    let user = firebase.auth().currentUser;
+    let file = document.getElementById("fileInput").files[0];
+
+    if(!file){
+        alert("Please select a file");
+        return;
+    }
+
+    let ref = storage.ref("kyc/" + user.uid + "/" + file.name);
+
+    let uploadTask = ref.put(file);
+
+    uploadTask.on("state_changed", null, error=>{
+        alert(error.message);
+    }, ()=>{
+        uploadTask.snapshot.ref.getDownloadURL()
+        .then(url=>{
+
+            db.collection("kyc").doc(user.uid).set({
+                imageUrl: url,
+                status: "pending",
+                timestamp: Date.now()
+            });
+
+            showStatus("pending");
+
+            alert("KYC submitted successfully!");
+        });
+    });
+}
+
+// BACK
+function goBack(){
+    window.location = "dashboard.html";
+}
+
+</script>
+
+</body>
+</html>
