@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Settings - SummitFX</title>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+<style>
+body {
+    margin:0;
+    font-family: Arial;
+    background: linear-gradient(180deg,#0b1220,#05080f);
+    color:white;
+}
+
+.header {
+    padding:15px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.title {
+    font-size:20px;
+    font-weight:bold;
+    background: linear-gradient(45deg,#00ffcc,#00aaff);
+    -webkit-background-clip:text;
+    color:transparent;
+}
+
+.card {
+    margin:20px;
+    padding:20px;
+    background: rgba(255,255,255,0.05);
+    border-radius:15px;
+    border:1px solid rgba(255,255,255,0.08);
+}
+
+input {
+    width:100%;
+    padding:12px;
+    margin-top:10px;
+    border:none;
+    border-radius:10px;
+    background:#111827;
+    color:white;
+}
+
+.btn {
+    width:100%;
+    padding:12px;
+    margin-top:10px;
+    border:none;
+    border-radius:10px;
+    background:linear-gradient(45deg,#00ffcc,#0099ff);
+    color:black;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.status {
+    margin-top:10px;
+    font-size:14px;
+    color:orange;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="header">
+    <div class="title">Settings</div>
+    <button onclick="goBack()" style="background:none;border:none;color:white;">⬅ Back</button>
+</div>
+
+<!-- ACCOUNT INFO -->
+<div class="card">
+    <h3>Account Info</h3>
+
+    <label>Email</label>
+    <input type="text" id="email" disabled>
+
+    <label>Full Name</label>
+    <input type="text" id="name" placeholder="Enter your name">
+
+    <button class="btn" onclick="saveProfile()">Save Profile</button>
+</div>
+
+<!-- PASSWORD -->
+<div class="card">
+    <h3>Security</h3>
+
+    <label>New Password</label>
+    <input type="password" id="password" placeholder="Enter new password">
+
+    <button class="btn" onclick="changePassword()">Change Password</button>
+</div>
+
+<!-- KYC STATUS -->
+<div class="card">
+    <h3>KYC Verification</h3>
+
+    <div id="kycStatus">Checking...</div>
+</div>
+
+<!-- LOGOUT -->
+<div class="card">
+    <button class="btn" onclick="logout()">Logout</button>
+</div>
+
+<script>
+
+// FIREBASE CONFIG
+const firebaseConfig = {
+  apiKey: "AIzaSyAT-Yr_wusE2KKW7YpEfQpQMeJYe2WqWW0",
+  authDomain: "summitfx-trading.firebaseapp.com",
+  projectId: "summitfx-trading",
+  storageBucket: "summitfx-trading.appspot.com",
+  messagingSenderId: "838670474162",
+  appId: "1:838670474162:web:b3d9eac185a7932a20a2ab"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const db = firebase.firestore();
+
+// AUTH CHECK
+firebase.auth().onAuthStateChanged(user=>{
+    if(!user){
+        window.location = "login.html";
+    } else {
+        loadUser(user);
+        loadKYC(user.uid);
+    }
+});
+
+// LOAD USER DATA
+function loadUser(user){
+    document.getElementById("email").value = user.email;
+
+    db.collection("users").doc(user.uid).get().then(doc=>{
+        if(doc.exists){
+            document.getElementById("name").value = doc.data().name || "";
+        }
+    });
+}
+
+// SAVE PROFILE
+function saveProfile(){
+    let user = firebase.auth().currentUser;
+    let name = document.getElementById("name").value;
+
+    db.collection("users").doc(user.uid).set({
+        name: name
+    }, { merge: true });
+
+    alert("Profile updated!");
+}
+
+// CHANGE PASSWORD
+function changePassword(){
+    let user = firebase.auth().currentUser;
+    let password = document.getElementById("password").value;
+
+    if(password.length < 6){
+        alert("Password must be at least 6 characters");
+        return;
+    }
+
+    user.updatePassword(password)
+    .then(()=>{
+        alert("Password updated successfully!");
+    })
+    .catch(err=>{
+        alert(err.message);
+    });
+}
+
+// LOAD KYC STATUS
+function loadKYC(uid){
+    db.collection("kyc").doc(uid).get().then(doc=>{
+        if(doc.exists){
+            document.getElementById("kycStatus").innerHTML =
+            "<span style='color:orange;'>Pending Verification</span>";
+        } else {
+            document.getElementById("kycStatus").innerHTML =
+            "<span style='color:red;'>Not Submitted</span>";
+        }
+    });
+}
+
+// LOGOUT
+function logout(){
+    firebase.auth().signOut().then(()=>{
+        window.location = "login.html";
+    });
+}
+
+// BACK
+function goBack(){
+    window.location = "dashboard.html";
+}
+
+</script>
+
+</body>
+  </html>
