@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -207,9 +207,10 @@ input {
     <div class="big green">+318%</div>
 </div>
 
+<!-- ✅ ONLY CHANGE APPLIED HERE -->
 <div class="card">
-    <div class="title">Active A.I Bots</div>
-    <div class="big">2 Running</div>
+    <div class="title">Acquire Bot</div>
+    <div class="big" onclick="goTo('acquire-bot.html')" style="cursor:pointer;">Click to Purchase</div>
 </div>
 
 <div class="actions">
@@ -261,7 +262,7 @@ document.addEventListener("click", function(e){
     }
 });
 
-// NAVIGATION FUNCTION (NEW)
+// NAVIGATION FUNCTION
 function goTo(page){
     window.location.href = page;
 }
@@ -336,4 +337,4 @@ firebase.auth().signOut().then(()=>window.location="login.html");
 </script>
 
 </body>
-    </html>
+</html>
