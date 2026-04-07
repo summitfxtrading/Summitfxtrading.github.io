@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Acquire Bot</title>
+
+<style>
+body {
+    margin:0;
+    font-family: Arial;
+    background: linear-gradient(180deg,#0b1220,#05080f);
+    color:white;
+}
+
+.container {
+    padding:20px;
+}
+
+.card {
+    background: rgba(255,255,255,0.05);
+    padding:20px;
+    border-radius:15px;
+    margin-top:20px;
+}
+
+h2 {
+    color:#00ffcc;
+}
+
+.price {
+    font-size:32px;
+    color:#00ffcc;
+    text-align:center;
+    margin:10px 0;
+}
+
+button {
+    width:100%;
+    padding:12px;
+    margin-top:10px;
+    border:none;
+    border-radius:10px;
+    background:linear-gradient(45deg,#00ffcc,#0099ff);
+    color:black;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+/* INPUT */
+input {
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:10px;
+    margin-top:10px;
+    background:#111827;
+    color:white;
+    text-align:center;
+}
+
+/* QR */
+.qr {
+    display:flex;
+    justify-content:center;
+    margin-top:15px;
+}
+
+.qr img {
+    width:200px;
+    height:200px;
+    border-radius:10px;
+}
+
+ul {
+    line-height:1.8;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <h2>Acquire Trading Bot</h2>
+
+    <div class="card">
+
+        <div class="price">$100</div>
+
+        <p>Pay using USDT (TRC20)</p>
+
+        <div class="qr">
+            <!-- Replace this with your real USDT QR if needed -->
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=USDT_PAYMENT_ADDRESS" alt="QR Code">
+        </div>
+
+        <!-- COPY ADDRESS -->
+        <input id="address" value="TLEMJfnDaAqSoGWTG19WRMp2nco3qM6kDW" readonly>
+
+        <button onclick="copyAddress()">Copy Address</button>
+
+        <button onclick="paid()">I Have Paid</button>
+
+    </div>
+
+    <div class="card">
+
+        <h3>What You Get</h3>
+
+        <p>This is what you get after buying the bot:</p>
+
+        <ul>
+            <li>✅ The ex5 file (this is the bot itself)</li>
+            <li>✅ A step-by-step installation guide</li>
+            <li>✅ Recommended settings</li>
+        </ul>
+
+    </div>
+
+</div>
+
+<script>
+
+// COPY ADDRESS
+function copyAddress(){
+    navigator.clipboard.writeText(document.getElementById("address").value);
+    alert("Address copied!");
+}
+
+// AFTER PAYMENT BUTTON
+function paid(){
+    alert("Payment submitted! We will verify and activate your bot.");
+
+    // Future:
+    // - Connect to Firebase
+    // - Verify payment
+    // - Activate bot
+
+    window.location = "dashboard.html";
+}
+
+</script>
+
+</body>
+</html>
