@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plan Details</title>
+
+<style>
+body {
+    margin:0;
+    font-family: Arial;
+    background: linear-gradient(180deg,#0b1220,#05080f);
+    color:white;
+    text-align:center;
+}
+
+.card {
+    margin:20px;
+    padding:25px;
+    border-radius:15px;
+    background: rgba(255,255,255,0.05);
+}
+
+.big {
+    font-size:28px;
+    margin:10px 0;
+}
+
+.green {
+    color:#00ffcc;
+}
+
+.btn {
+    width:90%;
+    padding:15px;
+    margin-top:20px;
+    border:none;
+    border-radius:10px;
+    background:linear-gradient(45deg,#00ffcc,#0099ff);
+    color:black;
+    font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+    <h2>Investment Summary</h2>
+
+    <div>Invest</div>
+    <div class="big" id="amount">$0</div>
+
+    <div>Return</div>
+    <div class="big green" id="profit">$0</div>
+
+    <div>Duration</div>
+    <div id="duration"></div>
+
+    <button class="btn" onclick="proceed()">Proceed to Deposit</button>
+
+</div>
+
+<script>
+
+// LOAD PLAN
+let plan = JSON.parse(localStorage.getItem("plan"));
+
+if(plan){
+    document.getElementById("amount").innerText = "$" + plan.amount;
+    document.getElementById("profit").innerText = "$" + plan.profit;
+    document.getElementById("duration").innerText = plan.duration;
+}
+
+// PROCEED
+function proceed(){
+    window.location = "deposit.html";
+}
+
+</script>
+
+</body>
+</html>
