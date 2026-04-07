@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Markets - SummitFX</title>
+
+<style>
+body {
+    margin:0;
+    font-family: Arial;
+    background: linear-gradient(180deg,#0b1220,#05080f);
+    color:white;
+}
+
+.header {
+    padding:15px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.title {
+    font-size:20px;
+    font-weight:bold;
+    background: linear-gradient(45deg,#00ffcc,#00aaff);
+    -webkit-background-clip:text;
+    color:transparent;
+}
+
+.container {
+    display:flex;
+    flex-wrap:wrap;
+}
+
+/* CARDS */
+.card {
+    flex:1;
+    min-width:300px;
+    margin:10px;
+    padding:15px;
+    background: rgba(255,255,255,0.05);
+    border-radius:15px;
+    border:1px solid rgba(255,255,255,0.08);
+}
+
+/* ROW */
+.row {
+    display:flex;
+    justify-content:space-between;
+    padding:10px 0;
+    border-bottom:1px solid #222;
+    font-size:14px;
+}
+
+.green { color:#00ffcc; }
+.red { color:#ff4d4d; }
+
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <div class="title">Markets</div>
+    <button onclick="goBack()" style="background:none;border:none;color:white;">⬅ Back</button>
+</div>
+
+<div class="container">
+
+    <!-- FOREX -->
+    <div class="card">
+        <h3>Forex & Metals</h3>
+
+        <div class="row">
+            <span>XAU/USD</span>
+            <span id="xau">2300</span>
+            <span id="xauChange" class="green">+0.5%</span>
+        </div>
+
+        <div class="row">
+            <span>EUR/USD</span>
+            <span id="eur">1.08</span>
+            <span id="eurChange" class="red">-0.2%</span>
+        </div>
+
+        <div class="row">
+            <span>USD/JPY</span>
+            <span id="jpy">150.20</span>
+            <span id="jpyChange" class="green">+0.3%</span>
+        </div>
+
+        <div class="row">
+            <span>GBP/USD</span>
+            <span id="gbp">1.26</span>
+            <span id="gbpChange" class="green">+0.1%</span>
+        </div>
+
+        <div class="row">
+            <span>AUD/USD</span>
+            <span id="aud">0.66</span>
+            <span id="audChange" class="red">-0.4%</span>
+        </div>
+
+    </div>
+
+    <!-- CRYPTO -->
+    <div class="card">
+        <h3>Crypto Market</h3>
+
+        <div id="crypto">Loading...</div>
+
+    </div>
+
+</div>
+
+<script>
+
+// BACK
+function goBack(){
+    window.location = "dashboard.html";
+}
+
+// 🔥 SIMULATED FOREX (random movement for realism)
+function updateForex(){
+    function randomChange(){
+        return (Math.random() * 2 - 1).toFixed(2);
+    }
+
+    function update(idPrice, idChange, base){
+        let change = randomChange();
+        let price = (base * (1 + change/100)).toFixed(2);
+
+        let elPrice = document.getElementById(idPrice);
+        let elChange = document.getElementById(idChange);
+
+        elPrice.innerText = price;
+        elChange.innerText = (change > 0 ? "+" : "") + change + "%";
+
+        elChange.className = change > 0 ? "green" : "red";
+    }
+
+    update("xau","xauChange",2300);
+    update("eur","eurChange",1.08);
+    update("jpy","jpyChange",150);
+    update("gbp","gbpChange",1.26);
+    update("aud","audChange",0.66);
+}
+
+// 🔥 CRYPTO LIVE DATA
+async function loadCrypto(){
+    try{
+        let res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,tether,ripple,solana&vs_currencies=usd&include_24hr_change=true");
+        let data = await res.json();
+
+        let html = "";
+
+        function row(name, price, change){
+            let color = change >= 0 ? "green" : "red";
+            let sign = change >= 0 ? "+" : "";
+
+            return `
+            <div class="row">
+                <span>${name}</span>
+                <span>$${price}</span>
+                <span class="${color}">${sign}${change.toFixed(2)}%</span>
+            </div>`;
+        }
+
+        html += row("BTC", data.bitcoin.usd, data.bitcoin.usd_24h_change);
+        html += row("ETH", data.ethereum.usd, data.ethereum.usd_24h_change);
+        html += row("USDT", data.tether.usd, data.tether.usd_24h_change || 0);
+        html += row("XRP", data.ripple.usd, data.ripple.usd_24h_change);
+        html += row("SOL", data.solana.usd, data.solana.usd_24h_change);
+
+        document.getElementById("crypto").innerHTML = html;
+
+    }catch{
+        document.getElementById("crypto").innerText = "Error loading market data";
+    }
+}
+
+// RUN
+updateForex();
+loadCrypto();
+
+// AUTO REFRESH
+setInterval(()=>{
+    updateForex();
+    loadCrypto();
+},10000);
+
+</script>
+
+</body>
+  </html>
