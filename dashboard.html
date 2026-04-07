@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -43,21 +42,17 @@ body {
     cursor:pointer;
 }
 
-/* DROPDOWN MENU (FIXED HERE) */
+/* DROPDOWN MENU (FIXED) */
 .dropdown {
-    position:absolute;
-    top:60px;
+    display:none;
+    position:fixed;
+    top:70px;
     right:15px;
     background:#111827;
     border-radius:10px;
     overflow:hidden;
-    display:none;
+    z-index:99999;
     box-shadow:0 5px 20px rgba(0,0,0,0.7);
-    z-index:9999; /* 🔥 THIS FIXES IT */
-}
-
-.dropdown.show {
-    display:block;
 }
 
 .dropdown div {
@@ -79,6 +74,16 @@ body {
     white-space:nowrap;
     border-top:1px solid #222;
     border-bottom:1px solid #222;
+}
+
+.ticker span {
+    display:inline-block;
+    animation: scroll 20s linear infinite;
+}
+
+@keyframes scroll {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
 }
 
 /* CARDS */
@@ -155,6 +160,17 @@ input {
     padding:10px 0;
     border-top:1px solid #222;
 }
+
+.menu div {
+    text-align:center;
+    font-size:12px;
+    opacity:0.7;
+}
+
+.menu div:hover {
+    color:#00ffcc;
+    opacity:1;
+}
 </style>
 
 </head>
@@ -165,16 +181,16 @@ input {
 <div class="header">
     <div class="logo">SummitFX</div>
     <div class="menu-btn" onclick="toggleMenu()">☰</div>
+</div>
 
-    <!-- MENU INSIDE HEADER (IMPORTANT FIX) -->
-    <div class="dropdown" id="dropdownMenu">
-        <div onclick="alert('My Profile')">My Profile</div>
-        <div onclick="alert('Edit Profile')">Edit Profile</div>
-        <div onclick="alert('Withdraw')">Withdraw</div>
-        <div onclick="alert('Deposit')">Deposit</div>
-        <div onclick="alert('Verify KYC')">Verify KYC</div>
-        <div onclick="logout()">Logout</div>
-    </div>
+<!-- DROPDOWN MENU -->
+<div class="dropdown" id="dropdownMenu">
+    <div onclick="alert('My Profile')">My Profile</div>
+    <div onclick="alert('Edit Profile')">Edit Profile</div>
+    <div onclick="alert('Withdraw')">Withdraw</div>
+    <div onclick="alert('Deposit')">Deposit</div>
+    <div onclick="alert('Verify KYC')">Verify KYC</div>
+    <div onclick="logout()">Logout</div>
 </div>
 
 <!-- LIVE TICKER -->
@@ -186,34 +202,148 @@ input {
 <div class="card">
     <div class="title">Account Balance</div>
     <div class="big" id="balance">$0</div>
+    <div class="title">+0.00 today</div>
+</div>
+
+<!-- STATS -->
+<div class="card">
+    <div class="title">All Time Profit</div>
+    <div class="big green">+318%</div>
+</div>
+
+<div class="card">
+    <div class="title">Active A.I Bots</div>
+    <div class="big">2 Running</div>
+</div>
+
+<!-- ACTION BUTTONS -->
+<div class="actions">
+    <button onclick="alert('Deposit')">💰<br>Deposit</button>
+    <button onclick="alert('Invest')">📈<br>Invest</button>
+    <button onclick="alert('Withdraw')">💸<br>Withdraw</button>
+    <button onclick="alert('Profile')">👤<br>Profile</button>
+</div>
+
+<!-- INVESTMENT -->
+<div class="card">
+<div class="title">Investment Plans</div>
+
+<button class="btn" onclick="selectPlan(400,8000)">$400 → $8000</button>
+<button class="btn" onclick="selectPlan(500,10000)">$500 → $10000</button>
+<button class="btn" onclick="selectPlan(600,12000)">$600 → $12000</button>
+
+<p id="planInfo"></p>
+</div>
+
+<!-- DEPOSIT -->
+<div class="card">
+<div class="title">Deposit USDT (TRC20)</div>
+
+<input id="usdtAddress" value="TLEMJfnDaAqSoGWTG19WRMp2nco3qM6kDW" readonly>
+
+<button class="btn" onclick="copyAddress()">Copy Address</button>
+</div>
+
+<!-- BOTTOM MENU -->
+<div class="menu">
+<div>🏠<br>Home</div>
+<div>📊<br>Markets</div>
+<div>💰<br>Wallet</div>
+<div>⚙️<br>Settings</div>
 </div>
 
 <script>
 
-// MENU FIX
+// MENU TOGGLE (FINAL FIX)
 function toggleMenu(){
-    document.getElementById("dropdownMenu").classList.toggle("show");
+    const menu = document.getElementById("dropdownMenu");
+
+    if(menu.style.display === "block"){
+        menu.style.display = "none";
+    } else {
+        menu.style.display = "block";
+    }
 }
 
-// CLOSE OUTSIDE
+// CLOSE WHEN CLICK OUTSIDE
 document.addEventListener("click", function(e){
     const menu = document.getElementById("dropdownMenu");
     const btn = document.querySelector(".menu-btn");
 
     if(!menu.contains(e.target) && !btn.contains(e.target)){
-        menu.classList.remove("show");
+        menu.style.display = "none";
     }
 });
 
 // FIREBASE CONFIG
 const firebaseConfig = {
-  apiKey: "AIza...",
+  apiKey: "AIzaSyAT-Yr_wusE2KKW7YpEfQpQMeJYe2WqWW0",
   authDomain: "summitfx-trading.firebaseapp.com",
-  projectId: "summitfx-trading"
+  projectId: "summitfx-trading",
+  storageBucket: "summitfx-trading.firebasestorage.app",
+  messagingSenderId: "838670474162",
+  appId: "1:838670474162:web:b3d9eac185a7932a20a2ab"
 };
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+
+// AUTH
+firebase.auth().onAuthStateChanged(user=>{
+if(user){
+const ref = db.collection("users").doc(user.uid);
+
+ref.get().then(doc=>{
+if(doc.exists){
+document.getElementById("balance").innerText = "$" + doc.data().balance;
+}else{
+ref.set({balance:0});
+}
+});
+}else{
+window.location="login.html";
+}
+});
+
+// LIVE PRICES
+async function loadPrices(){
+try{
+let r = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,tether,ripple&vs_currencies=usd&include_24hr_change=true");
+let d = await r.json();
+
+document.getElementById("prices").innerHTML =
+`BTC $${d.bitcoin.usd} (${d.bitcoin.usd_24h_change.toFixed(2)}%) &nbsp;&nbsp;
+ETH $${d.ethereum.usd} (${d.ethereum.usd_24h_change.toFixed(2)}%) &nbsp;&nbsp;
+USDT $${d.tether.usd} &nbsp;&nbsp;
+XRP $${d.ripple.usd}`;
+}catch{
+document.getElementById("prices").innerText="Error loading prices";
+}
+}
+loadPrices();
+setInterval(loadPrices,10000);
+
+// COPY
+function copyAddress(){
+navigator.clipboard.writeText(usdtAddress.value);
+alert("Copied!");
+}
+
+// PLAN
+function selectPlan(amount,profit){
+let user = firebase.auth().currentUser;
+if(user){
+db.collection("users").doc(user.uid).update({
+plan:{amount,profit}
+});
+planInfo.innerText = `Selected: $${amount} → $${profit}`;
+}
+}
+
+// LOGOUT
+function logout(){
+firebase.auth().signOut().then(()=>window.location="login.html");
+}
 
 </script>
 
