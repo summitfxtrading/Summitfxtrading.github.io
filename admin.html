@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard</title>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+<style>
+body {
+    margin:0;
+    font-family: Arial;
+    background: linear-gradient(180deg,#0b1220,#05080f);
+    color:white;
+}
+
+.header {
+    padding:15px;
+    text-align:center;
+    font-size:20px;
+    background:#111827;
+}
+
+.stats {
+    display:flex;
+    justify-content:space-around;
+    padding:10px;
+}
+
+.stat {
+    background:#111827;
+    padding:10px;
+    border-radius:10px;
+}
+
+.container {
+    padding:10px;
+}
+
+.card {
+    background: rgba(255,255,255,0.05);
+    padding:15px;
+    border-radius:10px;
+    margin-top:10px;
+}
+
+input {
+    width:100%;
+    padding:8px;
+    margin-top:5px;
+    background:#111827;
+    border:none;
+    color:white;
+}
+
+button {
+    margin-top:5px;
+    padding:8px;
+    width:100%;
+    border:none;
+    border-radius:8px;
+    background:#00ffcc;
+    cursor:pointer;
+}
+
+.small {
+    background:#0099ff;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">Admin Dashboard</div>
+
+<div class="stats">
+    <div class="stat">Users: <span id="totalUsers">0</span></div>
+    <div class="stat">Total Balance: $<span id="totalBalance">0</span></div>
+</div>
+
+<div class="container" id="usersList"></div>
+
+<script>
+
+// FIREBASE CONFIG
+const firebaseConfig = {
+  apiKey: "AIzaSyAT-Yr_wusE2KKW7YpEfQpQMeJYe2WqWW0",
+  authDomain: "summitfx-trading.firebaseapp.com",
+  projectId: "summitfx-trading",
+  storageBucket: "summitfx-trading.firebasestorage.app",
+  messagingSenderId: "838670474162",
+  appId: "1:838670474162:web:b3d9eac185a7932a20a2ab"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// AUTH CHECK
+firebase.auth().onAuthStateChanged(user=>{
+if(user){
+
+    // ✅ YOUR ADMIN EMAIL SET HERE
+    if(user.email !== "lkodomuk@kabarak.ac.ke"){
+        alert("Access denied");
+        window.location = "dashboard.html";
+        return;
+    }
+
+    loadUsers();
+
+}else{
+    window.location = "login.html";
+}
+});
+
+// LOAD USERS
+function loadUsers(){
+    db.collection("users").get().then(snapshot=>{
+        let html = "";
+        let totalBal = 0;
+
+        document.getElementById("totalUsers").innerText = snapshot.size;
+
+        snapshot.forEach(doc=>{
+            let d = doc.data();
+            totalBal += d.balance || 0;
+
+            html += `
+            <div class="card">
+                <b>Email:</b> ${d.email || "No Email"}<br>
+                <b>Balance:</b> $${d.balance || 0}<br>
+                <b>KYC:</b> ${d.kyc || "Pending"}<br>
+                <b>Bot:</b> ${d.bot || "Inactive"}<br>
+
+                <input placeholder="Add Deposit $" id="dep-${doc.id}">
+                <button onclick="approveDeposit('${doc.id}')">Approve Deposit</button>
+
+                <input placeholder="Withdraw $" id="with-${doc.id}">
+                <button class="small" onclick="approveWithdraw('${doc.id}')">Approve Withdraw</button>
+
+                <input placeholder="Set Balance $" id="bal-${doc.id}">
+                <button onclick="setBalance('${doc.id}')">Set Balance</button>
+
+                <button class="small" onclick="activateBot('${doc.id}')">Activate Bot</button>
+
+                <button class="small" onclick="verifyKYC('${doc.id}')">Verify KYC</button>
+            </div>
+            `;
+        });
+
+        document.getElementById("totalBalance").innerText = totalBal;
+        document.getElementById("usersList").innerHTML = html;
+    });
+}
+
+// APPROVE DEPOSIT
+function approveDeposit(uid){
+    let val = Number(document.getElementById("dep-"+uid).value);
+    if(!val) return alert("Enter deposit");
+
+    let ref = db.collection("users").doc(uid);
+
+    ref.get().then(doc=>{
+        let current = doc.data().balance || 0;
+
+        ref.update({
+            balance: current + val
+        }).then(()=>{
+            alert("Deposit added");
+            loadUsers();
+        });
+    });
+}
+
+// APPROVE WITHDRAW
+function approveWithdraw(uid){
+    let val = Number(document.getElementById("with-"+uid).value);
+    if(!val) return alert("Enter amount");
+
+    let ref = db.collection("users").doc(uid);
+
+    ref.get().then(doc=>{
+        let current = doc.data().balance || 0;
+
+        if(val > current){
+            alert("Insufficient balance");
+            return;
+        }
+
+        ref.update({
+            balance: current - val
+        }).then(()=>{
+            alert("Withdraw approved");
+            loadUsers();
+        });
+    });
+}
+
+// SET BALANCE
+function setBalance(uid){
+    let val = Number(document.getElementById("bal-"+uid).value);
+    if(isNaN(val)) return alert("Invalid");
+
+    db.collection("users").doc(uid).update({
+        balance: val
+    }).then(()=>{
+        alert("Balance updated");
+        loadUsers();
+    });
+}
+
+// ACTIVATE BOT
+function activateBot(uid){
+    db.collection("users").doc(uid).update({
+        bot: "Active"
+    }).then(()=>{
+        alert("Bot activated");
+        loadUsers();
+    });
+}
+
+// VERIFY KYC
+function verifyKYC(uid){
+    db.collection("users").doc(uid).update({
+        kyc: "Verified"
+    }).then(()=>{
+        alert("KYC verified");
+        loadUsers();
+    });
+}
+
+</script>
+
+</body>
+  </html>
