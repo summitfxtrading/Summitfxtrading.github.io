@@ -7,7 +7,7 @@
 
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script> <!-- ✅ ADDED ONLY -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
 <style>
 body {
@@ -114,19 +114,22 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore(); // 🔥 already in your code
+const db = firebase.firestore();
 
-// LOGIN FUNCTION
+// LOGIN FUNCTION (FIXED ONLY HERE)
 function login(){
+
+    let emailVal = document.getElementById("email").value;
+    let passwordVal = document.getElementById("password").value;
+
     firebase.auth().signInWithEmailAndPassword(
-        email.value,
-        password.value
+        emailVal,
+        passwordVal
     )
     .then(async (userCredential) => {
 
         let user = userCredential.user;
 
-        // 🔐 CHECK ADMIN ROLE FROM FIRESTORE
         let doc = await db.collection("users").doc(user.uid).get();
 
         if(doc.exists && doc.data().isAdmin === true){
