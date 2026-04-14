@@ -75,7 +75,6 @@ a {
     color:#00ffcc;
     text-decoration:none;
 }
-
 </style>
 
 </head>
@@ -123,9 +122,17 @@ function register(){
     }
 
     firebase.auth().createUserWithEmailAndPassword(emailVal, passwordVal)
-    .then(() => {
-        alert("Account created successfully!");
-        window.location = "dashboard.html";
+    .then((userCredential) => {
+
+        let user = userCredential.user;
+
+        // ✅ SEND VERIFICATION EMAIL (THIS IS THE FIX)
+        user.sendEmailVerification()
+        .then(() => {
+            alert("Account created! Verification link sent to your email.");
+            window.location = "login.html";
+        });
+
     })
     .catch(error => {
         alert(error.message);
@@ -136,4 +143,3 @@ function register(){
 
 </body>
 </html>
-
